@@ -1,0 +1,7 @@
+random_seed: 42
+n_networks: 50
+n_repeats: 10
+sparsity_levels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50 ]
+gpu_ids: [ 2, 3 ]
+data_types: [ 'expression', 'indegree' ]
+methods: [ 'pearson', 'spearman' ]
