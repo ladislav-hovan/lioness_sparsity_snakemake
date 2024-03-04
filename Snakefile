@@ -1,5 +1,7 @@
 configfile: 'config.yaml'
 
+import os
+
 from snakemake_gpu_manager import GpuManager, allocate_gpus
 
 gpu_manager = GpuManager(config['gpu_ids'])
@@ -18,9 +20,9 @@ rule all:
 
 rule filter_expression_and_priors:
     input:
-        'input/expression_tcga_brca_raw_nohead.tsv',
-        'input/motif_prior.tsv',
-        'input/ppi_prior.tsv',
+        os.path.join(config['input_dir'], config['expression_file']),
+        os.path.join(config['input_dir'], config['motif_file']),
+        os.path.join(config['input_dir'], config['ppi_file']),
     output:
         'filtered_input/expression.tsv',
         'filtered_input/motif_prior.tsv',

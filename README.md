@@ -49,8 +49,12 @@ snakemake --cores=10 --resources gpus=2
 ```
 
 Currently the pipeline requires at least 1 GPU. It is assumed that all 
-the input is present (in the `input/` directory) and that the settings 
-in the `config.yaml` file are correct. Relevant settings are:
+the input is present and that the settings in the `config.yaml` file are
+correct. Relevant settings are:
+- `input_dir`: the directory containing the input files
+- `expression_file`: name of the gene expression file
+- `motif_file`: name of the motif prior file
+- `ppi_file`: name of the PPI prior file
 - `n_networks`: the number of networks to be generated from the list
 of samples, must not exceed the total number of samples in the 
 expression file (all samples are always used for background)
