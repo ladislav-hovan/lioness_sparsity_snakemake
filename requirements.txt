@@ -1,0 +1,7 @@
+numpy
+pandas
+netZooPy
+matplotlib
+scipy
+snakemake
+pytools
