@@ -1,0 +1,12 @@
+*.pyc
+.snakemake/
+expression_correlations/
+filtered_input/
+gpu_manager/
+indegree_correlations/
+# input can be a directory or a symlink
+input
+input/
+lioness_networks/
+plots/
+sparse_expression/
