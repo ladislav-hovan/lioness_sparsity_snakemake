@@ -1,75 +1,170 @@
+### Configuration file ###
 configfile: 'config.yaml'
 
+### Imports and setup ###
 import os
 
-from snakemake_gpu_manager import GpuManager, allocate_gpus
+global_resources = workflow.global_resources
 
-gpu_manager = GpuManager(config['gpu_ids'])
+if 'gpus' in global_resources and global_resources['gpus'] > 0:
+    assert global_resources['gpus'] == len(config['gpu_ids']), (
+        'The number of GPUs in resources must match the length of provided '
+        'GPU ids')
+
+    USE_GPU = True
+
+    import cupy as cp
+
+    gpu_devices = [cp.cuda.Device(i) for i in range(4)]
+
+    from snakemake_gpu_manager import GpuManager, allocate_gpus
+
+    gpu_manager = GpuManager(config['gpu_ids'])
+else:
+    USE_GPU = False
+
+### Configuration variables ###
+input_dir = config['input_dir']
+
+### Input and output ###
+SUMMARY_PLOTS = expand(
+    os.path.join('plots', '{data_type}_{method}_correlation.png'),
+    data_type=config['data_types'],
+    method=config['methods'],
+)
+
+EXPRESSION_FILE = os.path.join(input_dir, config['expression_file'])
+MOTIF_FILE = os.path.join(input_dir, config['motif_file'])
+PPI_FILE = os.path.join(input_dir, config['ppi_file'])
+
+# F_ prefix for filtered
+F_EXPRESSION_FILE = os.path.join('filtered_input', 'expression.tsv')
+F_MOTIF_FILE = os.path.join('filtered_input', 'motif_prior.tsv')
+F_PPI_FILE = os.path.join('filtered_input', 'ppi_prior.tsv')
+
+# S_ prefix for sparse
+S_EXPRESSION_FILES = expand(
+    os.path.join('sparse_expression', '{{sparsity}}', 
+        'expression_{repeat}.tsv'),
+    repeat=range(config['n_repeats']),
+)
 
 # TODO: Variables for input and output
 
+### Rules ###
 rule all:
     input:
-        expand(
-            'plots/{data_type}_{method}_correlation.png',
-            data_type=config['data_types'],
-            method=config['methods'],
-        )
+        SUMMARY_PLOTS
+    default_target: 
+        True
 
 # TODO: Convert scripts to Python functions, call from here as run block
 
 rule filter_expression_and_priors:
     input:
-        os.path.join(config['input_dir'], config['expression_file']),
-        os.path.join(config['input_dir'], config['motif_file']),
-        os.path.join(config['input_dir'], config['ppi_file']),
+        EXPRESSION_FILE,
+        MOTIF_FILE,
+        PPI_FILE,
     output:
-        'filtered_input/expression.tsv',
-        'filtered_input/motif_prior.tsv',
-        'filtered_input/ppi_prior.tsv',
+        F_EXPRESSION_FILE,
+        F_MOTIF_FILE,
+        F_PPI_FILE,
     script:
         'scripts/filter_expression_and_priors.py'
 
 rule sparsify_reads:
     input:
-        'filtered_input/expression.tsv'
+        F_EXPRESSION_FILE
     output:
-        expand(
-            'sparse_expression/{{sparsity}}/expression_{repeat}.tsv',
-            repeat=range(config['n_repeats']),
-        )
+        S_EXPRESSION_FILES
     script:
         'scripts/sparsify_reads.py'
-
-# TODO: Make CPU-only compatible via logical statements
 
 rule calculate_lioness_networks:
     input:
         'sparse_expression/{sparsity}/expression_{repeat}.tsv',
-        'filtered_input/motif_prior.tsv',
-        'filtered_input/ppi_prior.tsv',
+        F_MOTIF_FILE,
+        F_PPI_FILE,
     output:
         'lioness_networks/{sparsity}/{repeat}/lioness.tsv'
+    threads:
+        1 if USE_GPU else 4
     resources:
-        gpus = 1
-    params:
-        gpu_manager = gpu_manager
-    script:
-        'scripts/calculate_lioness_networks.py'
+        gpus = int(USE_GPU)
+    run:
+        from scripts.calculate_lioness_networks import create_lioness_networks
+
+        if USE_GPU:
+            with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
+                # Only one device is yielded here
+                with gpu_devices[gpu_ids[0]]:
+                    create_lioness_networks(
+                        input[0], 
+                        input[1], 
+                        input[2], 
+                        '.', 
+                        'gpu', 
+                        lioness_options={
+                            'start': 1, 
+                            'end': int(config['n_networks']),
+                            'export_filename': output[0],
+                        })
+        else:
+            create_lioness_networks(
+                input[0], 
+                input[1], 
+                input[2], 
+                '.', 
+                'cpu', 
+                lioness_options={
+                    'start': 1, 
+                    'end': int(config['n_networks']),
+                    'export_filename': output[0],
+                    'ncores': threads
+                })
 
 rule calculate_baseline_networks:
     input:
         'filtered_input/expression.tsv',
-        'filtered_input/motif_prior.tsv',
-        'filtered_input/ppi_prior.tsv',
+        F_MOTIF_FILE,
+        F_PPI_FILE,
     output:
         'lioness_networks/baseline/lioness.tsv'
+    threads:
+        1 if USE_GPU else 4
     resources:
-        gpus = 1
-    params:
-        gpu_manager = gpu_manager
-    script:
-        'scripts/calculate_lioness_networks.py'
+        gpus = int(USE_GPU)
+    run:
+        from scripts.calculate_lioness_networks import create_lioness_networks
+
+        if USE_GPU:
+            with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
+                # Only one device is yielded here
+                with gpu_devices[gpu_ids[0]]:
+                    create_lioness_networks(
+                        input[0], 
+                        input[1], 
+                        input[2], 
+                        '.', 
+                        'gpu', 
+                        lioness_options={
+                            'start': 1, 
+                            'end': int(config['n_networks']),
+                            'export_filename': output[0],
+                        })
+        else:
+            create_lioness_networks(
+                input[0],
+                input[1],
+                input[2],
+                '.', 
+                'cpu', 
+                lioness_options={
+                    'start': 1, 
+                    'end': int(config['n_networks']),
+                    'export_filename': output[0],
+                    'ncores': threads
+                })
 
 rule convert_lioness_tsv_to_feather:
     input:

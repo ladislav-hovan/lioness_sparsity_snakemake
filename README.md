@@ -1,6 +1,6 @@
 # LIONESS sparsity testing
-This Snakemake pipeline measures the sensitivity of LIONESS to varying levels
-of sparsity.
+This Snakemake pipeline measures the sensitivity of LIONESS to varying 
+levels of sparsity.
 
 
 ## Table of Contents
