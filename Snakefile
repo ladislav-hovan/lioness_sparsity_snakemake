@@ -1,5 +1,6 @@
 ### Configuration file ###
 configfile: 'config.yaml'
+# configfile: os.path.join('tests', 'test_config.yaml')
 
 ### Imports and setup ###
 import os
@@ -48,8 +49,48 @@ S_EXPRESSION_FILES = expand(
         'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
+S_EXPRESSION_FILE = os.path.join('sparse_expression', '{sparsity}', 
+    'expression_{repeat}.tsv')
 
-# TODO: Variables for input and output
+S_LIONESS_TSV = os.path.join('lioness_networks', '{sparsity}', '{repeat}', 
+    'lioness.tsv')
+BL_LIONESS_TSV = os.path.join('lioness_networks', 'baseline', 'lioness.tsv')
+ANY_LIONESS_TSV = os.path.join('lioness_networks', '{path_to_dir}', 
+    'lioness.tsv')
+
+ANY_LIONESS_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
+    'lioness.feather')
+ANY_INDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
+    'indegrees.feather')
+ANY_OUTDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
+    'outdegrees.feather')
+
+EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{sparsity}', 
+    'pearson.tsv')
+EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{sparsity}', 
+    'spearman.tsv')
+
+COEXPR_ERROR = os.path.join('coexpression_error', '{sparsity}', 
+    'abs_error.tsv')
+
+BL_INDEGREE_FEATHER = os.path.join('lioness_networks', 'baseline', 
+    'indegrees.feather')
+S_INDEGREES_FEATHER = expand(
+    os.path.join('lioness_networks', '{{sparsity}}', '{repeat}', 
+        'indegrees.feather'),
+    repeat=range(config['n_repeats']),
+)
+
+IND_CORR_PEARSON = os.path.join('indegree_correlations', '{sparsity}', 
+    'pearson.tsv')
+IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{sparsity}', 
+    'spearman.tsv')
+
+CORR_FILES = expand(
+    os.path.join('{{data_type}}_correlations', '{sparsity}', '{{method}}.tsv'),
+    sparsity=config['sparsity_levels'],
+)
+CORR_PLOT = os.path.join('plots', '{data_type}_{method}_correlation.png')
 
 ### Rules ###
 rule all:
@@ -82,145 +123,113 @@ rule sparsify_reads:
 
 rule calculate_lioness_networks:
     input:
-        'sparse_expression/{sparsity}/expression_{repeat}.tsv',
+        S_EXPRESSION_FILE,
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
-        'lioness_networks/{sparsity}/{repeat}/lioness.tsv'
+        S_LIONESS_TSV,
     threads:
         1 if USE_GPU else 4
     resources:
         gpus = int(USE_GPU)
-    run:
-        from scripts.calculate_lioness_networks import create_lioness_networks
+    params:
+        gpu_manager = (gpu_manager if USE_GPU else None)
+    script:
+        'scripts/calculate_lioness_networks.py'
+    
+    # Future possible implementation once the run bug is fixed
+    # https://github.com/snakemake/snakemake/issues/2350
+    # run:
+    #     from scripts.calculate_lioness_networks import create_lioness_networks
 
-        if USE_GPU:
-            with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
-                # Only one device is yielded here
-                with gpu_devices[gpu_ids[0]]:
-                    create_lioness_networks(
-                        input[0], 
-                        input[1], 
-                        input[2], 
-                        '.', 
-                        'gpu', 
-                        lioness_options={
-                            'start': 1, 
-                            'end': int(config['n_networks']),
-                            'export_filename': output[0],
-                        })
-        else:
-            create_lioness_networks(
-                input[0], 
-                input[1], 
-                input[2], 
-                '.', 
-                'cpu', 
-                lioness_options={
-                    'start': 1, 
-                    'end': int(config['n_networks']),
-                    'export_filename': output[0],
-                    'ncores': threads
-                })
+    #     if USE_GPU:
+    #         with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
+    #             # Only one device is yielded here
+    #             with gpu_devices[gpu_ids[0]]:
+    #                 create_lioness_networks(
+    #                     input[0], 
+    #                     input[1], 
+    #                     input[2], 
+    #                     '.', 
+    #                     'gpu', 
+    #                     lioness_options={
+    #                         'start': 1, 
+    #                         'end': int(config['n_networks']),
+    #                         'export_filename': output[0],
+    #                     })
+    #     else:
+    #         create_lioness_networks(
+    #             input[0], 
+    #             input[1], 
+    #             input[2], 
+    #             '.', 
+    #             'cpu', 
+    #             lioness_options={
+    #                 'start': 1, 
+    #                 'end': int(config['n_networks']),
+    #                 'export_filename': output[0],
+    #                 'ncores': threads
+    #             })
 
 rule calculate_baseline_networks:
     input:
-        'filtered_input/expression.tsv',
+        F_EXPRESSION_FILE,
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
-        'lioness_networks/baseline/lioness.tsv'
+        BL_LIONESS_TSV
     threads:
         1 if USE_GPU else 4
     resources:
         gpus = int(USE_GPU)
-    run:
-        from scripts.calculate_lioness_networks import create_lioness_networks
-
-        if USE_GPU:
-            with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
-                # Only one device is yielded here
-                with gpu_devices[gpu_ids[0]]:
-                    create_lioness_networks(
-                        input[0], 
-                        input[1], 
-                        input[2], 
-                        '.', 
-                        'gpu', 
-                        lioness_options={
-                            'start': 1, 
-                            'end': int(config['n_networks']),
-                            'export_filename': output[0],
-                        })
-        else:
-            create_lioness_networks(
-                input[0],
-                input[1],
-                input[2],
-                '.', 
-                'cpu', 
-                lioness_options={
-                    'start': 1, 
-                    'end': int(config['n_networks']),
-                    'export_filename': output[0],
-                    'ncores': threads
-                })
+    params:
+        gpu_manager = (gpu_manager if USE_GPU else None)
+    script:
+        'scripts/calculate_lioness_networks.py'
 
 rule convert_lioness_tsv_to_feather:
     input:
-        'lioness_networks/{path_to_dir}/lioness.tsv'
+        ANY_LIONESS_TSV
     output:
-        'lioness_networks/{path_to_dir}/lioness.feather',
-        'lioness_networks/{path_to_dir}/indegrees.feather',
-        'lioness_networks/{path_to_dir}/outdegrees.feather',
+        ANY_LIONESS_FEATHER,
+        ANY_INDEGREE_FEATHER,
+        ANY_OUTDEGREE_FEATHER,
     script:
         'scripts/process_lioness_tsv.py'
 
 rule calculate_expression_correlations:
     input:
-        'filtered_input/expression.tsv',
-        expand(
-            'sparse_expression/{{sparsity}}/expression_{repeat}.tsv',
-            repeat=range(config['n_repeats']),
-        ),
+        F_EXPRESSION_FILE,
+        S_EXPRESSION_FILES,
     output:
-        'expression_correlations/{sparsity}/pearson.tsv',
-        'expression_correlations/{sparsity}/spearman.tsv',
+        EXPR_CORR_PEARSON,
+        EXPR_CORR_SPEARMAN,
     script:
         'scripts/calculate_correlations.py'
 
 rule calculate_coexpression_error:
     input:
-        'filtered_input/expression.tsv',
-        expand(
-            'sparse_expression/{{sparsity}}/expression_{repeat}.tsv',
-            repeat=range(config['n_repeats']),
-        ),
+        F_EXPRESSION_FILE,
+        S_EXPRESSION_FILES,
     output:
-        'coexpression_error/{sparsity}/abs_error.feather'
+        COEXPR_ERROR
     script:
         'scripts/calculate_coexpression_error.py'
 
 rule calculate_indegree_correlations:
     input:
-        'lioness_networks/baseline/indegrees.feather',
-        expand(
-            'lioness_networks/{{sparsity}}/{repeat}/indegrees.feather',
-            repeat=range(config['n_repeats']),
-        ),
+        BL_INDEGREE_FEATHER,
+        S_INDEGREES_FEATHER,
     output:
-        'indegree_correlations/{sparsity}/pearson.tsv',
-        'indegree_correlations/{sparsity}/spearman.tsv',
+        IND_CORR_PEARSON,
+        IND_CORR_SPEARMAN,
     script:
         'scripts/calculate_correlations.py'
 
 rule plot_correlation_by_sparsity:
     input:
-        expand(
-            '{{data_type}}_correlations/{sparsity}/{{method}}.tsv',
-            sparsity=config['sparsity_levels'],
-        )
+        CORR_FILES
     output:
-        'plots/{data_type}_{method}_correlation.png'
+        CORR_PLOT
     script:
         'scripts/plot_correlation_by_sparsity.py'

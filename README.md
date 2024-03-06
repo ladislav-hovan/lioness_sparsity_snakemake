@@ -33,7 +33,7 @@ The features already available are:
 - Cleanup of expression data and prior networks
 - Generation of sparsified expression
 - Generation of LIONESS networks
-- Summary Peason and Spearman correlations of both expression and 
+- Summary Pearson and Spearman correlations of both expression and 
 LIONESS networks with the unmodified baseline
 
 
