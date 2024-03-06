@@ -11,7 +11,7 @@ use_gpu = bool(snakemake.resources['gpus'])
 if use_gpu:
     import cupy as cp
 
-    from snakemake_gpu_manager import allocate_gpus
+    from lib.gpu_manager import allocate_gpus
 
 ### Functions ###
 def create_lioness_networks(

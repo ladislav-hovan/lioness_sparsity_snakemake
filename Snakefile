@@ -18,11 +18,14 @@ if 'gpus' in global_resources and global_resources['gpus'] > 0:
 
     gpu_devices = [cp.cuda.Device(i) for i in range(4)]
 
-    from snakemake_gpu_manager import GpuManager, allocate_gpus
+    from lib.gpu_manager import GpuManager, allocate_gpus
 
     gpu_manager = GpuManager(config['gpu_ids'])
 else:
     USE_GPU = False
+
+    gpu_manager = None
+    allocate_gpus = None
 
 ### Configuration variables ###
 input_dir = config['input_dir']
@@ -135,7 +138,7 @@ rule calculate_lioness_networks:
     params:
         gpu_manager = (gpu_manager if USE_GPU else None)
     script:
-        'scripts/calculate_lioness_networks.py'
+        f'{workflow.basedir}/scripts/calculate_lioness_networks.py'
     
     # Future possible implementation once the run bug is fixed
     # https://github.com/snakemake/snakemake/issues/2350
@@ -183,7 +186,7 @@ rule calculate_baseline_networks:
     resources:
         gpus = int(USE_GPU)
     params:
-        gpu_manager = (gpu_manager if USE_GPU else None)
+        gpu_manager = gpu_manager
     script:
         'scripts/calculate_lioness_networks.py'
 
