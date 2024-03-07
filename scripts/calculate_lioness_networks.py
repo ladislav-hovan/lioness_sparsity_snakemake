@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
 ### Imports ###
-import cupy as cp
 import pandas as pd
 
 from netZooPy.panda import Panda
 from netZooPy.lioness import Lioness
 
-from snakemake_gpu_manager import allocate_gpus
+use_gpu = bool(snakemake.resources['gpus'])
+
+if use_gpu:
+    import cupy as cp
+
+    from lib.gpu_manager import allocate_gpus
 
 ### Functions ###
 def create_lioness_networks(
@@ -25,16 +29,36 @@ def create_lioness_networks(
         save_fmt='npy', **lioness_options)
 
 ### Main body ###
-gpu_devices = [cp.cuda.Device(i) for i in range(4)]
+if use_gpu:
+    gpu_devices = [cp.cuda.Device(i) for i in range(4)]
 
-with allocate_gpus(snakemake.params['gpu_manager'], 
-    snakemake.resources['gpus']) as gpu_ids:
-    # Only one device is yielded here
-    with gpu_devices[gpu_ids[0]]:
-        create_lioness_networks(snakemake.input[0], snakemake.input[1], 
-            snakemake.input[2], '.', 'gpu', 
-            lioness_options={
-                'start': 1, 
-                'end': int(snakemake.config['n_networks']),
-                'export_filename': snakemake.output[0],
-            })
+    with allocate_gpus(snakemake.params['gpu_manager'], 
+        snakemake.resources['gpus']) as gpu_ids:
+        # Only one device is yielded here
+        with gpu_devices[gpu_ids[0]]:
+            create_lioness_networks(
+                snakemake.input[0], 
+                snakemake.input[1], 
+                snakemake.input[2], 
+                '.', 
+                'gpu',
+                lioness_options={
+                    'start': 1, 
+                    'end': int(snakemake.config['n_networks']),
+                    'export_filename': snakemake.output[0],
+                }
+            )
+else:
+    create_lioness_networks(
+        snakemake.input[0], 
+        snakemake.input[1], 
+        snakemake.input[2], 
+        '.', 
+        'cpu', 
+        lioness_options={
+            'start': 1, 
+            'end': int(snakemake.config['n_networks']),
+            'export_filename': snakemake.output[0],
+            'ncores': snakemake.threads
+        }
+    )
