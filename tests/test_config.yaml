@@ -6,6 +6,7 @@ ppi_file: 'ppi_prior.tsv'
 n_networks: 10
 n_repeats: 1
 sparsity_levels: [ 10, 20, 30, 40, 50 ]
-gpu_ids: [ 0, 1 ]
+gpu_ids: [ 0, 1, 2, 3 ]
+sparsifying_methods: [ 'resample', 'downsample' ]
 data_types: [ 'expression', 'indegree' ]
-methods: [ 'pearson', 'spearman' ]
+corr_types: [ 'pearson', 'spearman' ]

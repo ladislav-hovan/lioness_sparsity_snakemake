@@ -1,6 +1,6 @@
 ### Configuration file ###
-configfile: 'config.yaml'
-# configfile: os.path.join('tests', 'test_config.yaml')
+# configfile: 'config.yaml'
+configfile: os.path.join('tests', 'test_config.yaml')
 
 ### Imports and setup ###
 import os
@@ -31,10 +31,15 @@ else:
 input_dir = config['input_dir']
 
 ### Input and output ###
-SUMMARY_PLOTS = expand(
-    os.path.join('plots', '{data_type}_{method}_correlation.png'),
+SUMMARY_CORR_PLOTS = expand(
+    os.path.join('plots', '{data_type}_{method}_{corr}_correlation.png'),
     data_type=config['data_types'],
-    method=config['methods'],
+    method=config['sparsifying_methods'],
+    corr=config['corr_types'],
+)
+COEXPR_ERROR_PLOTS = expand(
+    os.path.join('plots', '{method}_coexpression_error.png'),
+    method=config['sparsifying_methods']
 )
 
 EXPRESSION_FILE = os.path.join(input_dir, config['expression_file'])
@@ -47,16 +52,28 @@ F_MOTIF_FILE = os.path.join('filtered_input', 'motif_prior.tsv')
 F_PPI_FILE = os.path.join('filtered_input', 'ppi_prior.tsv')
 
 # S_ prefix for sparse
-S_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', '{{sparsity}}', 
+# RS_ prefix for resample
+S_RS_EXPRESSION_FILES = expand(
+    os.path.join('sparse_expression', 'resample', '{{sparsity}}', 
         'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
-S_EXPRESSION_FILE = os.path.join('sparse_expression', '{sparsity}', 
-    'expression_{repeat}.tsv')
+S_RS_EXPRESSION_FILE = os.path.join('sparse_expression', 'resample',
+    '{sparsity}', 'expression_{repeat}.tsv')
 
-S_LIONESS_TSV = os.path.join('lioness_networks', '{sparsity}', '{repeat}', 
-    'lioness.tsv')
+# DS_ prefix for downsample
+S_DS_EXPRESSION_FILES = expand(
+    os.path.join('sparse_expression', 'downsample', '{{sparsity}}', 
+        'expression_{repeat}.tsv'),
+    repeat=range(config['n_repeats']),
+)
+S_DS_EXPRESSION_FILE = os.path.join('sparse_expression', 
+    'downsample', '{sparsity}', 'expression_{repeat}.tsv')
+
+S_ANY_EXPRESSION_FILE = os.path.join('sparse_expression', '{method}', 
+    '{sparsity}', 'expression_{repeat}.tsv')
+S_LIONESS_TSV = os.path.join('lioness_networks', '{method}', '{sparsity}', 
+    '{repeat}', 'lioness.tsv')
 BL_LIONESS_TSV = os.path.join('lioness_networks', 'baseline', 'lioness.tsv')
 ANY_LIONESS_TSV = os.path.join('lioness_networks', '{path_to_dir}', 
     'lioness.tsv')
@@ -68,37 +85,53 @@ ANY_INDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}',
 ANY_OUTDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
     'outdegrees.feather')
 
-EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{sparsity}', 
-    'pearson.tsv')
-EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{sparsity}', 
-    'spearman.tsv')
+S_ANY_EXPRESSION_FILES = expand(
+    os.path.join('sparse_expression', '{{method}}', '{{sparsity}}', 
+        'expression_{repeat}.tsv'),
+    repeat=range(config['n_repeats']),
+)
 
-COEXPR_ERROR = os.path.join('coexpression_error', '{sparsity}', 
+EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{method}', 
+    '{sparsity}', 'pearson.tsv')
+EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{method}', 
+    '{sparsity}', 'spearman.tsv')
+
+COEXPR_ERROR = os.path.join('coexpression_error', '{method}', '{sparsity}', 
     'abs_error.tsv')
 
 BL_INDEGREE_FEATHER = os.path.join('lioness_networks', 'baseline', 
     'indegrees.feather')
 S_INDEGREES_FEATHER = expand(
-    os.path.join('lioness_networks', '{{sparsity}}', '{repeat}', 
+    os.path.join('lioness_networks', '{{method}}', '{{sparsity}}', '{repeat}', 
         'indegrees.feather'),
     repeat=range(config['n_repeats']),
 )
 
-IND_CORR_PEARSON = os.path.join('indegree_correlations', '{sparsity}', 
-    'pearson.tsv')
-IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{sparsity}', 
-    'spearman.tsv')
+IND_CORR_PEARSON = os.path.join('indegree_correlations', '{method}', 
+    '{sparsity}', 'pearson.tsv')
+IND_CORR_SPEARMAN = os.path.join('indegree_correlations',  '{method}', 
+    '{sparsity}', 'spearman.tsv')
 
 CORR_FILES = expand(
-    os.path.join('{{data_type}}_correlations', '{sparsity}', '{{method}}.tsv'),
+    os.path.join('{{data_type}}_correlations', '{{method}}', '{sparsity}', 
+        '{{corr}}.tsv'),
     sparsity=config['sparsity_levels'],
 )
-CORR_PLOT = os.path.join('plots', '{data_type}_{method}_correlation.png')
+CORR_PLOT = os.path.join('plots', '{data_type}_{method}_{corr}_'
+    'correlation.png')
+
+COEXPR_ERROR_FILES = expand(
+    os.path.join('coexpression_error', '{{method}}', '{sparsity}', 
+        'abs_error.tsv'),
+    sparsity=config['sparsity_levels'],
+)
+COEXPR_ERROR_PLOT = os.path.join('plots', '{method}_coexpression_error.png')
 
 ### Rules ###
 rule all:
     input:
-        SUMMARY_PLOTS
+        SUMMARY_CORR_PLOTS,
+        COEXPR_ERROR_PLOTS,
     default_target: 
         True
 
@@ -116,17 +149,25 @@ rule filter_expression_and_priors:
     script:
         'scripts/filter_expression_and_priors.py'
 
-rule sparsify_reads:
+rule resample_reads:
     input:
         F_EXPRESSION_FILE
     output:
-        S_EXPRESSION_FILES
+        S_RS_EXPRESSION_FILES
     script:
-        'scripts/sparsify_reads.py'
+        'scripts/resample_reads.py'
+
+rule downsample_reads:
+    input:
+        F_EXPRESSION_FILE
+    output:
+        S_DS_EXPRESSION_FILES
+    script:
+        'scripts/downsample_reads.py'
 
 rule calculate_lioness_networks:
     input:
-        S_EXPRESSION_FILE,
+        S_ANY_EXPRESSION_FILE,
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
@@ -203,7 +244,7 @@ rule convert_lioness_tsv_to_feather:
 rule calculate_expression_correlations:
     input:
         F_EXPRESSION_FILE,
-        S_EXPRESSION_FILES,
+        S_ANY_EXPRESSION_FILES,
     output:
         EXPR_CORR_PEARSON,
         EXPR_CORR_SPEARMAN,
@@ -213,7 +254,7 @@ rule calculate_expression_correlations:
 rule calculate_coexpression_error:
     input:
         F_EXPRESSION_FILE,
-        S_EXPRESSION_FILES,
+        S_ANY_EXPRESSION_FILES,
     output:
         COEXPR_ERROR
     script:
@@ -236,3 +277,11 @@ rule plot_correlation_by_sparsity:
         CORR_PLOT
     script:
         'scripts/plot_correlation_by_sparsity.py'
+
+rule plot_coexpression_error_by_sparsity:
+    input:
+        COEXPR_ERROR_FILES
+    output:
+        COEXPR_ERROR_PLOT
+    script:
+        'scripts/plot_coexpression_error_by_sparsity.py'
