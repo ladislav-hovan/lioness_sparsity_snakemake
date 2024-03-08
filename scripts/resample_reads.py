@@ -11,16 +11,25 @@ def resample_reads(
     series: pd.Series,
     sparsity: float,
     rng: np.random.Generator,
+    min_chunk: int = 10000,
 ) -> pd.Series:
-    
+
     target_n = int((1.0 - sparsity) * len(series))
     probs = series.values / series.sum()
     counts = Counter()
 
     while len(counts) < target_n:
         to_gen = target_n - len(counts)
-        selection = rng.choice(series.index, to_gen, p=probs)
-        counts.update(selection)
+        selection = rng.choice(series.index, max(to_gen, min_chunk), p=probs)
+        temp = counts.copy()
+        temp.update(selection)
+        if len(temp) < target_n:
+            counts = temp
+        else:
+            index = 0
+            while len(counts) < target_n:
+                counts[selection[index]] += 1
+                index += 1
 
     sparse_series = pd.Series(counts.values(), index=counts.keys()
         ).reindex_like(series).fillna(0).astype(int)
@@ -30,7 +39,7 @@ def resample_reads(
 ### Main body ###
 rng = np.random.default_rng(snakemake.config['random_seed'])
 
-df = pd.read_csv(snakemake.input[0], sep='\t', index_col=0)
+df = pd.read_csv(snakemake.input[0], sep='\t', index_col=0, header=None)
 
 for attempt in range(snakemake.config['n_repeats']):
     temp = {}
@@ -38,4 +47,4 @@ for attempt in range(snakemake.config['n_repeats']):
         temp[pos] = resample_reads(df[col],
             0.01 * float(snakemake.wildcards['sparsity']), rng)
     df_temp = pd.DataFrame({i: temp[i] for i in range(df.shape[1])})
-    df_temp.to_csv(snakemake.output[attempt], sep='\t')
+    df_temp.to_csv(snakemake.output[attempt], sep='\t', header=False)
