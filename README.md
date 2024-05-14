@@ -24,8 +24,8 @@ It is intended to automate this process fully, starting from input
 expression file, prior motif network, prior PPI (protein-protein 
 interaction) network, and the settings provided in the config.yaml file.
 
-The entire pipeline is implemented using Snakemake. In its current
-iteration, it depends on GPUs to compute LIONESS networks.
+The entire pipeline is implemented using Snakemake. It will utilise
+GPUs to compute networks when available, but can also use CPUs only.
 
 
 ## Features
@@ -33,8 +33,13 @@ The features already available are:
 - Cleanup of expression data and prior networks
 - Generation of sparsified expression
 - Generation of LIONESS networks
-- Summary Pearson and Spearman correlations of both expression and 
-LIONESS networks with the unmodified baseline
+- Summary Pearson and Spearman correlations comparing to the unmodified
+  baseline:
+  - edge weights
+  - indegrees
+  - expression
+  - coexpression
+- Average error in coexpression across sparsity levels
 
 
 ## Setup
@@ -48,9 +53,8 @@ Running a Snakemake pipeline is straightforward:
 snakemake --cores=10 --resources gpus=2
 ```
 
-Currently the pipeline requires at least 1 GPU. It is assumed that all 
-the input is present and that the settings in the `config.yaml` file are
-correct. Relevant settings are:
+It is assumed that all the input is present and that the settings in the
+`config.yaml` file are correct. Relevant settings are:
 - `input_dir`: the directory containing the input files
 - `expression_file`: name of the gene expression file
 - `motif_file`: name of the motif prior file
@@ -72,12 +76,11 @@ The project is: _in progress_.
 ## Room for Improvement
 Room for improvement:
 - Change the passing of arguments to rules
-- Define variables for input and output
+- Finish defining variables for input and output
+- Finish refactoring shared functionality
 
 To do:
-- Implement undersampling for sparsified expression generation
-- Make the pipeline compatible with CPU-only setups
-- Add coexpression and plots that show the effect of sparsity on it
+- Stratification of results by gene expression levels
 
 
 ## Acknowledgements
