@@ -18,17 +18,18 @@ def plot_boxplots(
     ax.boxplot(data, labels=data.columns)
     ax.set_ylim(0, 1)
     ax.set_xlabel('Sparsity % of expressed genes')
-    method_name = snakemake.wildcards['method']
-    method_name = method_name[0].upper() + method_name[1:]
-    ax.set_ylabel(f'{method_name} R compared to no sparsity')
+    corr_name = snakemake.wildcards['corr']
+    corr_name = corr_name[0].upper() + corr_name[1:]
+    ax.set_ylabel(f'{corr_name} R compared to no sparsity')
     ax.grid(axis='y')
 
     return fig,ax
 
 ### Main body ###
 df = pd.DataFrame()
-for sparsity,file in zip(snakemake.config['sparsity_levels'], snakemake.input):
-    df[sparsity] = np.loadtxt(file)
+for sparsity,file in zip([0] + snakemake.config['sparsity_levels'], 
+    snakemake.input):
+    df[sparsity] = np.load(file)
 
 fig,ax = plot_boxplots(df)
 fig.savefig(snakemake.output[0], dpi=300, bbox_inches='tight')

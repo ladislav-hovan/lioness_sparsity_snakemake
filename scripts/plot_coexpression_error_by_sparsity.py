@@ -30,7 +30,7 @@ def plot_boxplots(
 ### Main body ###
 df = pd.DataFrame()
 for sparsity,file in zip(snakemake.config['sparsity_levels'], snakemake.input):
-    df[sparsity] = np.loadtxt(file)
+    df[sparsity] = np.load(file)
 
 fig,ax = plot_boxplots(df)
 fig.savefig(snakemake.output[0], dpi=300, bbox_inches='tight')

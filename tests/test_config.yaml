@@ -7,6 +7,8 @@ n_networks: 10
 n_repeats: 1
 sparsity_levels: [ 10, 20, 30, 40, 50 ]
 gpu_ids: [ 0, 1, 2, 3 ]
-sparsifying_methods: [ 'resample', 'downsample' ]
-data_types: [ 'expression', 'indegree' ]
-corr_types: [ 'pearson', 'spearman' ]
+transformations: [ 'raw_expression', 'log1p_rescaled' ]
+sparsifying_methods: [ 'resample' ] #, 'downsample' ]
+data_types: [ 'expression', 'indegree'] #, 'edge' ]
+corr_types: [ 'pearson' ] #, 'spearman' ]
+lioness_threads: 4

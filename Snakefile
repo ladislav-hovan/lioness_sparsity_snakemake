@@ -1,6 +1,6 @@
 ### Configuration file ###
-# configfile: 'config.yaml'
-configfile: os.path.join('tests', 'test_config.yaml')
+configfile: 'config.yaml'
+# configfile: os.path.join('tests', 'test_config.yaml')
 
 ### Imports and setup ###
 import os
@@ -16,7 +16,8 @@ if 'gpus' in global_resources and global_resources['gpus'] > 0:
 
     import cupy as cp
 
-    gpu_devices = [cp.cuda.Device(i) for i in range(4)]
+    gpu_devices = [cp.cuda.Device(i) for i in 
+        range(cp.cuda.runtime.getDeviceCount())]
 
     from lib.gpu_manager import GpuManager, allocate_gpus
 
@@ -30,16 +31,21 @@ else:
 ### Configuration variables ###
 input_dir = config['input_dir']
 
+# TODO: Split into multiple snakefiles
+
 ### Input and output ###
 SUMMARY_CORR_PLOTS = expand(
-    os.path.join('plots', '{data_type}_{method}_{corr}_correlation.png'),
-    data_type=config['data_types'],
+    os.path.join('plots', '{transform}', '{method}', '{data_type}', 
+        '{corr}_correlation.png'),
+    transform=config['transformations'],
     method=config['sparsifying_methods'],
+    data_type=config['data_types'],
     corr=config['corr_types'],
 )
 COEXPR_ERROR_PLOTS = expand(
-    os.path.join('plots', '{method}_coexpression_error.png'),
-    method=config['sparsifying_methods']
+    os.path.join('plots', '{transform}', '{method}_coexpr_error.png'),
+    transform=config['transformations'],
+    method=config['sparsifying_methods'],
 )
 
 EXPRESSION_FILE = os.path.join(input_dir, config['expression_file'])
@@ -47,36 +53,60 @@ MOTIF_FILE = os.path.join(input_dir, config['motif_file'])
 PPI_FILE = os.path.join(input_dir, config['ppi_file'])
 
 # F_ prefix for filtered
-F_EXPRESSION_FILE = os.path.join('filtered_input', 'expression.tsv')
-F_MOTIF_FILE = os.path.join('filtered_input', 'motif_prior.tsv')
-F_PPI_FILE = os.path.join('filtered_input', 'ppi_prior.tsv')
+F_EXPRESSION_FILE = os.path.join('filtered_input', 'raw_expression', 
+    'expression.tsv')
+F_MOTIF_FILE = os.path.join('filtered_input', 'raw_expression', 
+    'motif_prior.tsv')
+F_PPI_FILE = os.path.join('filtered_input', 'raw_expression', 'ppi_prior.tsv')
 
 # S_ prefix for sparse
 # RS_ prefix for resample
 S_RS_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', 'resample', '{{sparsity}}', 
-        'expression_{repeat}.tsv'),
+    os.path.join('sparse_expression', 'raw_expression', 'resample', 
+        '{{sparsity}}', 'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
-S_RS_EXPRESSION_FILE = os.path.join('sparse_expression', 'resample',
-    '{sparsity}', 'expression_{repeat}.tsv')
+S_RS_EXPRESSION_FILE = os.path.join('sparse_expression', 'raw_expression', 
+    'resample', '{sparsity}', 'expression_{repeat}.tsv')
 
 # DS_ prefix for downsample
 S_DS_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', 'downsample', '{{sparsity}}', 
+    os.path.join('sparse_expression', 'raw_expression', 'downsample', 
+        '{{sparsity}}', 'expression_{repeat}.tsv'),
+    repeat=range(config['n_repeats']),
+)
+S_DS_EXPRESSION_FILE = os.path.join('sparse_expression', 'raw_expression',
+    'downsample', '{sparsity}', 'expression_{repeat}.tsv')
+
+# C_ prefix for control
+C_EXPRESSION_FILES = expand(
+    os.path.join('control_expression', 'raw_expression', 
         'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
-S_DS_EXPRESSION_FILE = os.path.join('sparse_expression', 
-    'downsample', '{sparsity}', 'expression_{repeat}.tsv')
+C_TRANS_EXPRESSION_FILES = expand(
+    os.path.join('control_expression', '{{transform}}', 
+        'expression_{repeat}.tsv'),
+    repeat=range(config['n_repeats']),
+)
+C_TRANS_EXPRESSION_FILE = os.path.join('control_expression', '{transform}', 
+    'expression_{repeat}.tsv')
 
-S_ANY_EXPRESSION_FILE = os.path.join('sparse_expression', '{method}', 
-    '{sparsity}', 'expression_{repeat}.tsv')
-S_LIONESS_TSV = os.path.join('lioness_networks', '{method}', '{sparsity}', 
+S_ANY_EXPRESSION_FILE = os.path.join('sparse_expression', '{transform}', 
+    '{method}', '{sparsity}', 'expression_{repeat}.tsv')
+S_LIONESS_TSV = os.path.join('lioness_networks', '{transform}', 
+    '{method}', '{sparsity}', '{repeat}', 'lioness.tsv')
+BL_LIONESS_TSV = os.path.join('lioness_networks', '{transform}', 'baseline', 
+    'lioness.tsv')
+C_LIONESS_TSV = os.path.join('lioness_networks', '{transform}', 'control', 
     '{repeat}', 'lioness.tsv')
-BL_LIONESS_TSV = os.path.join('lioness_networks', 'baseline', 'lioness.tsv')
 ANY_LIONESS_TSV = os.path.join('lioness_networks', '{path_to_dir}', 
     'lioness.tsv')
+
+ANY_EXPRESSION_FILE = os.path.join('{path_to_dir_1}', 
+    'raw_expression{path_to_dir_2}', 'expression{repeat}.tsv')
+ANY_LOG1P_EXPRESSION_FILE = os.path.join('{path_to_dir_1}', 
+    'log1p_rescaled{path_to_dir_2}', 'expression{repeat}.tsv')
 
 ANY_LIONESS_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
     'lioness.feather')
@@ -86,56 +116,117 @@ ANY_OUTDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}',
     'outdegrees.feather')
 
 S_ANY_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', '{{method}}', '{{sparsity}}', 
-        'expression_{repeat}.tsv'),
+    os.path.join('sparse_expression', '{{transform}}', '{{method}}', 
+        '{{sparsity}}', 'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
 
-EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{method}', 
-    '{sparsity}', 'pearson.tsv')
-EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{method}', 
-    '{sparsity}', 'spearman.tsv')
+F_TRANS_EXPRESSION_FILE = os.path.join('filtered_input', '{transform}', 
+    'expression.tsv')
 
-COEXPR_ERROR = os.path.join('coexpression_error', '{method}', '{sparsity}', 
-    'abs_error.tsv')
+EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'pearson.npy')
+EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'spearman.npy')
 
-BL_INDEGREE_FEATHER = os.path.join('lioness_networks', 'baseline', 
-    'indegrees.feather')
-S_INDEGREES_FEATHER = expand(
-    os.path.join('lioness_networks', '{{method}}', '{{sparsity}}', '{repeat}', 
+C_EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}', 
+    'control', 'pearson.npy')
+C_EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}', 
+    'control', 'spearman.npy')
+
+COEXPR_ERROR = os.path.join('coexpression_error', '{transform}', '{method}', 
+    '{sparsity}', 'abs_error.npy')
+
+BL_INDEGREE_FEATHER = os.path.join('lioness_networks', '{transform}', 
+    'baseline', 'indegrees.feather')
+C_INDEGREES_FEATHER = expand(
+    os.path.join('lioness_networks', '{{transform}}', 'control', '{repeat}', 
         'indegrees.feather'),
     repeat=range(config['n_repeats']),
 )
+S_INDEGREES_FEATHER = expand(
+    os.path.join('lioness_networks', '{{transform}}', '{{method}}', 
+        '{{sparsity}}', '{repeat}', 'indegrees.feather'),
+    repeat=range(config['n_repeats']),
+)
 
-IND_CORR_PEARSON = os.path.join('indegree_correlations', '{method}', 
-    '{sparsity}', 'pearson.tsv')
-IND_CORR_SPEARMAN = os.path.join('indegree_correlations',  '{method}', 
-    '{sparsity}', 'spearman.tsv')
+IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'pearson.npy')
+IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'spearman.npy')
 
+C_IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}', 
+    'control', 'pearson.npy')
+C_IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}', 
+    'control', 'spearman.npy')
+
+BL_LIONESS_FEATHER = os.path.join('lioness_networks', '{transform}', 
+    'baseline', 'lioness.feather')
+C_LIONESS_FEATHER = expand(
+    os.path.join('lioness_networks', '{{transform}}', 'control', '{repeat}', 
+        'lioness.feather'),
+    repeat=range(config['n_repeats']),
+)
+S_LIONESS_FEATHER = expand(
+    os.path.join('lioness_networks', '{{transform}}', '{{method}}', 
+        '{{sparsity}}', '{repeat}', 'lioness.feather'),
+    repeat=range(config['n_repeats']),
+)
+
+EDGE_CORR_PEARSON = os.path.join('edge_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'pearson.npy')
+EDGE_CORR_SPEARMAN = os.path.join('edge_correlations', '{transform}', 
+    '{method}', '{sparsity}', 'spearman.npy')
+
+C_EDGE_CORR_PEARSON = os.path.join('edge_correlations', '{transform}', 
+    'control', 'pearson.npy')
+C_EDGE_CORR_SPEARMAN = os.path.join('edge_correlations', '{transform}', 
+    'control', 'spearman.npy')
+
+CONTROL_FILES = os.path.join('{data_type}_correlations', '{transform}', 
+    'control', '{corr}.npy')
 CORR_FILES = expand(
-    os.path.join('{{data_type}}_correlations', '{{method}}', '{sparsity}', 
-        '{{corr}}.tsv'),
+    os.path.join('{{data_type}}_correlations', '{{transform}}', '{{method}}', 
+        '{sparsity}', '{{corr}}.npy'),
     sparsity=config['sparsity_levels'],
 )
-CORR_PLOT = os.path.join('plots', '{data_type}_{method}_{corr}_'
-    'correlation.png')
+CORR_PLOT = os.path.join('plots', '{transform}', '{method}', '{data_type}', 
+    '{corr}_correlation.png')
 
 COEXPR_ERROR_FILES = expand(
-    os.path.join('coexpression_error', '{{method}}', '{sparsity}', 
-        'abs_error.tsv'),
+    os.path.join('coexpression_error', '{{transform}}', '{{method}}', 
+        '{sparsity}', 'abs_error.npy'),
     sparsity=config['sparsity_levels'],
 )
-COEXPR_ERROR_PLOT = os.path.join('plots', '{method}_coexpression_error.png')
+COEXPR_ERROR_PLOT = os.path.join('plots', '{transform}', 
+    '{method}_coexpr_error.png')
 
 ### Rules ###
 rule all:
     input:
         SUMMARY_CORR_PLOTS,
         COEXPR_ERROR_PLOTS,
-    default_target: 
+        expand(
+            os.path.join('coexpression_networks', '{transform}', 
+                '{method}', '{sparsity}', '{repeat}', 'lioness.feather'),
+            transform=config['transformations'],
+            method=config['sparsifying_methods'],
+            sparsity=config['sparsity_levels'],
+            repeat=range(config['n_repeats']),
+        ),
+        expand(
+            os.path.join('coexpression_correlations', '{transform}', 
+                '{method}', '{sparsity}', 'pearson.npy'),
+            transform=config['transformations'],
+            method=config['sparsifying_methods'],
+            sparsity=config['sparsity_levels'],
+        ),
+    default_target:
         True
 
 # TODO: Convert scripts to Python functions, call from here as run block
+# TODO: Make sure the scripts are command line callable as well
+# TODO: Effectively implement one main function that's called with arguments
 
 rule filter_expression_and_priors:
     input:
@@ -165,6 +256,45 @@ rule downsample_reads:
     script:
         'scripts/downsample_reads.py'
 
+rule generate_control_expression:
+    input:
+        F_EXPRESSION_FILE
+    output:
+        C_EXPRESSION_FILES
+    script:
+        'scripts/generate_control_expression.py'
+
+rule mark_zero_expression_genes:
+    input:
+        S_ANY_EXPRESSION_FILE
+    output:
+        os.path.join('sparse_expression', '{method}', '{sparsity}', 
+            'mark_zero_{repeat}.tsv')
+    script:
+        'scripts/mark_zero_expression_genes.py'
+
+rule mark_top_half_expression_genes:
+    input:
+        S_ANY_EXPRESSION_FILE
+    output:
+        os.path.join('sparse_expression', '{method}', '{sparsity}', 
+            'mark_top_half_{repeat}.tsv')
+    script:
+        'scripts/mark_top_half_expression_genes.py'
+
+rule rescale_filtered_expression_log1p:
+    input:
+        ANY_EXPRESSION_FILE
+    output:
+        ANY_LOG1P_EXPRESSION_FILE
+    wildcard_constraints:
+        # Allow them to be empty as well
+        repeat='.*',
+        path_to_dir_2='.*',
+    script:
+        'scripts/rescale_expression_log1p.py'
+
+# TODO: Make sure that changing GPU to CPU does not trigger reruns - but how?
 rule calculate_lioness_networks:
     input:
         S_ANY_EXPRESSION_FILE,
@@ -173,13 +303,13 @@ rule calculate_lioness_networks:
     output:
         S_LIONESS_TSV,
     threads:
-        1 if USE_GPU else 4
+        1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
     params:
-        gpu_manager = (gpu_manager if USE_GPU else None)
+        gpu_manager = gpu_manager
     script:
-        f'{workflow.basedir}/scripts/calculate_lioness_networks.py'
+        f'scripts/calculate_lioness_networks.py'
     
     # Future possible implementation once the run bug is fixed
     # https://github.com/snakemake/snakemake/issues/2350
@@ -217,19 +347,68 @@ rule calculate_lioness_networks:
 
 rule calculate_baseline_networks:
     input:
-        F_EXPRESSION_FILE,
+        F_TRANS_EXPRESSION_FILE,
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
         BL_LIONESS_TSV
     threads:
-        1 if USE_GPU else 4
+        1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
     params:
         gpu_manager = gpu_manager
     script:
         'scripts/calculate_lioness_networks.py'
+
+rule calculate_control_networks:
+    input:
+        C_TRANS_EXPRESSION_FILE,
+        F_MOTIF_FILE,
+        F_PPI_FILE,
+    output:
+        C_LIONESS_TSV
+    threads:
+        1 if USE_GPU else config['lioness_threads']
+    resources:
+        gpus = int(USE_GPU)
+    params:
+        gpu_manager = gpu_manager
+    script:
+        'scripts/calculate_lioness_networks.py'
+
+rule calculate_coexpression_networks:
+    input:
+        S_ANY_EXPRESSION_FILE
+    output:
+        os.path.join('coexpression_networks', '{transform}', 
+            '{method}', '{sparsity}', '{repeat}', 'lioness.feather')
+    threads:
+        1 if USE_GPU else config['lioness_threads']
+    resources:
+        gpus = int(USE_GPU)
+    params:
+        gpu_manager = gpu_manager
+    script:
+        f'scripts/calculate_coexpression_networks.py'
+
+rule calculate_baseline_coexpression_matrix:
+    input:
+        F_TRANS_EXPRESSION_FILE
+    output:
+        os.path.join('coexpression_matrices', '{transform}', 'baseline', 
+            'coexpression.feather')
+    script:
+        'scripts/calculate_coexpression_matrix.py'
+
+rule calculate_coexpression_matrix:
+    input:
+        S_ANY_EXPRESSION_FILE
+    output:
+        os.path.join('coexpression_matrices', '{transform}', '{method}', 
+            '{sparsity}', 'coexpression_{repeat}.feather')
+    script:
+        'scripts/calculate_coexpression_matrix.py'
 
 rule convert_lioness_tsv_to_feather:
     input:
@@ -243,7 +422,7 @@ rule convert_lioness_tsv_to_feather:
 
 rule calculate_expression_correlations:
     input:
-        F_EXPRESSION_FILE,
+        F_TRANS_EXPRESSION_FILE,
         S_ANY_EXPRESSION_FILES,
     output:
         EXPR_CORR_PEARSON,
@@ -251,9 +430,36 @@ rule calculate_expression_correlations:
     script:
         'scripts/calculate_correlations.py'
 
+rule calculate_expression_correlations_control:
+    input:
+        F_TRANS_EXPRESSION_FILE,
+        C_TRANS_EXPRESSION_FILES,
+    output:
+        C_EXPR_CORR_PEARSON,
+        C_EXPR_CORR_SPEARMAN,
+    script:
+        'scripts/calculate_correlations.py'
+
+rule calculate_coexpression_correlations:
+    input:
+        os.path.join('coexpression_matrices', '{transform}', 'baseline', 
+            'coexpression.feather'),
+        expand(
+            os.path.join('coexpression_matrices', '{{transform}}', 
+                '{{method}}', '{{sparsity}}', 'coexpression_{repeat}.feather'),
+            repeat=range(config['n_repeats']),
+        ),
+    output:
+        os.path.join('coexpression_correlations', '{transform}', 
+            '{method}', '{sparsity}', 'pearson.npy'),
+        os.path.join('coexpression_correlations', '{transform}', 
+            '{method}', '{sparsity}', 'spearman.npy'),
+    script:
+        'scripts/calculate_correlations.py'
+
 rule calculate_coexpression_error:
     input:
-        F_EXPRESSION_FILE,
+        F_TRANS_EXPRESSION_FILE,
         S_ANY_EXPRESSION_FILES,
     output:
         COEXPR_ERROR
@@ -270,9 +476,40 @@ rule calculate_indegree_correlations:
     script:
         'scripts/calculate_correlations.py'
 
+rule calculate_indegree_correlations_control:
+    input:
+        BL_INDEGREE_FEATHER,
+        C_INDEGREES_FEATHER,
+    output:
+        C_IND_CORR_PEARSON,
+        C_IND_CORR_SPEARMAN,
+    script:
+        'scripts/calculate_correlations.py'
+
+rule calculate_edge_correlations:
+    input:
+        BL_LIONESS_FEATHER,
+        S_LIONESS_FEATHER,
+    output:
+        EDGE_CORR_PEARSON,
+        EDGE_CORR_SPEARMAN,
+    script:
+        'scripts/calculate_correlations.py'
+
+rule calculate_edge_correlations_control:
+    input:
+        BL_LIONESS_FEATHER,
+        C_LIONESS_FEATHER,
+    output:
+        C_EDGE_CORR_PEARSON,
+        C_EDGE_CORR_SPEARMAN,
+    script:
+        'scripts/calculate_correlations.py'
+
 rule plot_correlation_by_sparsity:
     input:
-        CORR_FILES
+        CONTROL_FILES,
+        CORR_FILES,
     output:
         CORR_PLOT
     script:
