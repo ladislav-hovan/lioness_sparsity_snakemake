@@ -7,8 +7,6 @@ import scipy.stats as stats
 
 from lib.functions_io import load_file
 
-# TODO: Make a common function
-
 ### Main body ###
 baseline_df = load_file(snakemake.input[0])
 bl_coexpr_df = baseline_df.T.corr()
