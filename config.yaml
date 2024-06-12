@@ -9,6 +9,7 @@ sparsity_levels: [ 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50 ]
 gpu_ids: [ 0, 1, 2, 3 ]
 transformations: [ 'raw_expression' ] #, 'log1p_rescaled' ]
 sparsifying_methods: [ 'resample' ] #, 'downsample' ]
-data_types: [ 'expression', 'indegree', 'edge' ]
+data_types: [ 'expression', 'indegree', 'edge', 'coexpression', 
+  'coexpression_network' ]
 corr_types: [ 'pearson', 'spearman' ]
 lioness_threads: 4

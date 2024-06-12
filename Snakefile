@@ -32,28 +32,28 @@ else:
 input_dir = config['input_dir']
 
 ### Input and output variables ###
-include: 'Snakefile_variables'
+include: 'variables.smk'
 
 ### Rules ###
 rule all:
     input:
         SUMMARY_CORR_PLOTS,
         COEXPR_ERROR_PLOTS,
-        expand(
-            os.path.join('coexpression_networks', '{transform}', 
-                '{method}', '{sparsity}', '{repeat}', 'lioness.feather'),
-            transform=config['transformations'],
-            method=config['sparsifying_methods'],
-            sparsity=config['sparsity_levels'],
-            repeat=range(config['n_repeats']),
-        ),
-        expand(
-            os.path.join('coexpression_correlations', '{transform}', 
-                '{method}', '{sparsity}', 'pearson.npy'),
-            transform=config['transformations'],
-            method=config['sparsifying_methods'],
-            sparsity=config['sparsity_levels'],
-        ),
+        # expand(
+        #     os.path.join('coexpression_networks', '{transform}', 
+        #         '{method}', '{sparsity}', '{repeat}', 'lioness.feather'),
+        #     transform=config['transformations'],
+        #     method=config['sparsifying_methods'],
+        #     sparsity=config['sparsity_levels'],
+        #     repeat=range(config['n_repeats']),
+        # ),
+        # expand(
+        #     os.path.join('coexpression_correlations', '{transform}', 
+        #         '{method}', '{sparsity}', 'pearson.npy'),
+        #     transform=config['transformations'],
+        #     method=config['sparsifying_methods'],
+        #     sparsity=config['sparsity_levels'],
+        # ),
     default_target:
         True
 
@@ -61,10 +61,10 @@ rule all:
 # TODO: Make sure the scripts are command line callable as well
 # TODO: Effectively implement one main function that's called with arguments
 
-include: 'Snakefile_expression'
+include: 'expression.smk'
 
-include: 'Snakefile_networks'
+include: 'networks.smk'
 
-include: 'Snakefile_correlations'
+include: 'correlations.smk'
 
-include: 'Snakefile_plotting'
+include: 'plotting.smk'

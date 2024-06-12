@@ -94,7 +94,41 @@ rule calculate_coexpression_networks:
     params:
         gpu_manager = gpu_manager
     script:
-        f'scripts/calculate_coexpression_networks.py'
+        'scripts/calculate_coexpression_networks.py'
+
+rule calculate_baseline_coexpression_networks:
+    input:
+        F_TRANS_EXPRESSION_FILE,
+        F_MOTIF_FILE,
+        F_PPI_FILE,
+    output:
+        os.path.join('coexpression_networks', '{transform}', 
+            'baseline', 'lioness.feather')
+    threads:
+        1 if USE_GPU else config['lioness_threads']
+    resources:
+        gpus = int(USE_GPU)
+    params:
+        gpu_manager = gpu_manager
+    script:
+        'scripts/calculate_coexpression_networks.py'  
+
+rule calculate_control_coexpression_networks:
+    input:
+        C_TRANS_EXPRESSION_FILE,
+        F_MOTIF_FILE,
+        F_PPI_FILE,
+    output:
+        os.path.join('coexpression_networks', '{transform}', 
+            'control', '{repeat}', 'lioness.feather')
+    threads:
+        1 if USE_GPU else config['lioness_threads']
+    resources:
+        gpus = int(USE_GPU)
+    params:
+        gpu_manager = gpu_manager
+    script:
+        'scripts/calculate_coexpression_networks.py'
 
 rule calculate_baseline_coexpression_matrix:
     input:
@@ -102,6 +136,15 @@ rule calculate_baseline_coexpression_matrix:
     output:
         os.path.join('coexpression_matrices', '{transform}', 'baseline', 
             'coexpression.feather')
+    script:
+        'scripts/calculate_coexpression_matrix.py'
+
+rule calculate_control_coexpression_matrix:
+    input:
+        C_TRANS_EXPRESSION_FILE
+    output:
+        os.path.join('coexpression_matrices', '{transform}', 'control', 
+            'coexpression_{repeat}.feather')
     script:
         'scripts/calculate_coexpression_matrix.py'
 
