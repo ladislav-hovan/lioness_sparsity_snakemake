@@ -1,10 +1,31 @@
 ### Imports ###
 import pandas as pd
 
+from pathlib import Path
+
 ### Functions ###
 def load_file(
-    filename: str,
+    filename: Path,
 ) -> pd.DataFrame:
+    """
+    Reads a tsv or feather file and tries to process it based on the 
+    detected column names.
+
+    Parameters
+    ----------
+    filename : Path
+        The path to the file of interest
+
+    Returns
+    -------
+    pd.DataFrame
+        The processed pandas DataFrame
+
+    Raises
+    ------
+    ValueError
+        If the extension is neither tsv nor feather
+    """
     
     extension = filename.split('.')[-1]
 

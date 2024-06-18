@@ -1,4 +1,3 @@
-# TODO: Make sure that changing GPU to CPU does not trigger reruns - but how?
 rule calculate_lioness_networks:
     input:
         S_ANY_EXPRESSION_FILE,
@@ -10,44 +9,18 @@ rule calculate_lioness_networks:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
-    script:
-        f'scripts/calculate_lioness_networks.py'
-    
-    # Future possible implementation once the run bug is fixed
-    # https://github.com/snakemake/snakemake/issues/2350
-    # run:
-    #     from scripts.calculate_lioness_networks import create_lioness_networks
+    run:
+        from scripts.calculate_lioness_networks import (
+            calculate_lioness_networks)
 
-    #     if USE_GPU:
-    #         with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
-    #             # Only one device is yielded here
-    #             with gpu_devices[gpu_ids[0]]:
-    #                 create_lioness_networks(
-    #                     input[0], 
-    #                     input[1], 
-    #                     input[2], 
-    #                     '.', 
-    #                     'gpu', 
-    #                     lioness_options={
-    #                         'start': 1, 
-    #                         'end': int(config['n_networks']),
-    #                         'export_filename': output[0],
-    #                     })
-    #     else:
-    #         create_lioness_networks(
-    #             input[0], 
-    #             input[1], 
-    #             input[2], 
-    #             '.', 
-    #             'cpu', 
-    #             lioness_options={
-    #                 'start': 1, 
-    #                 'end': int(config['n_networks']),
-    #                 'export_filename': output[0],
-    #                 'ncores': threads
-    #             })
+        if resources['gpus'] > 0:
+            with allocate_gpus(gpu_manager,
+                resources['gpus']) as gpu_ids:
+                calculate_lioness_networks(input[0], input[1], input[2], 
+                    output[0], config['n_networks'], gpu_ids[0], threads)
+        else:
+            calculate_lioness_networks(input[0], input[1], input[2], output[0], 
+                config['n_networks'], None, threads)
 
 rule calculate_baseline_networks:
     input:
@@ -60,10 +33,18 @@ rule calculate_baseline_networks:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
-    script:
-        'scripts/calculate_lioness_networks.py'
+    run:
+        from scripts.calculate_lioness_networks import (
+            calculate_lioness_networks)
+
+        if resources['gpus'] > 0:
+            with allocate_gpus(gpu_manager,
+                resources['gpus']) as gpu_ids:
+                calculate_lioness_networks(input[0], input[1], input[2], 
+                    output[0], config['n_networks'], gpu_ids[0], threads)
+        else:
+            calculate_lioness_networks(input[0], input[1], input[2], output[0], 
+                config['n_networks'], None, threads)
 
 rule calculate_control_networks:
     input:
@@ -71,15 +52,23 @@ rule calculate_control_networks:
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
-        C_LIONESS_TSV
+        C_LIONESS_FEATHER_SINGLE
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
-    script:
-        'scripts/calculate_lioness_networks.py'
+    run:
+        from scripts.calculate_lioness_networks import (
+            calculate_lioness_networks)
+
+        if resources['gpus'] > 0:
+            with allocate_gpus(gpu_manager,
+                resources['gpus']) as gpu_ids:
+                calculate_lioness_networks(input[0], input[1], input[2], 
+                    output[0], config['n_networks'], gpu_ids[0], threads)
+        else:
+            calculate_lioness_networks(input[0], input[1], input[2], output[0], 
+                config['n_networks'], None, threads)
 
 rule calculate_coexpression_networks:
     input:
@@ -91,8 +80,8 @@ rule calculate_coexpression_networks:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
+    # params:
+    #     gpu_manager = gpu_manager
     script:
         'scripts/calculate_coexpression_networks.py'
 
@@ -108,8 +97,8 @@ rule calculate_baseline_coexpression_networks:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
+    # params:
+    #     gpu_manager = gpu_manager
     script:
         'scripts/calculate_coexpression_networks.py'  
 
@@ -125,8 +114,8 @@ rule calculate_control_coexpression_networks:
         1 if USE_GPU else config['lioness_threads']
     resources:
         gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
+    # params:
+    #     gpu_manager = gpu_manager
     script:
         'scripts/calculate_coexpression_networks.py'
 
@@ -157,12 +146,12 @@ rule calculate_coexpression_matrix:
     script:
         'scripts/calculate_coexpression_matrix.py'
 
-rule convert_lioness_tsv_to_feather:
-    input:
-        ANY_LIONESS_TSV
-    output:
-        ANY_LIONESS_FEATHER,
-        ANY_INDEGREE_FEATHER,
-        ANY_OUTDEGREE_FEATHER,
-    script:
-        'scripts/process_lioness_tsv.py'
+# rule convert_lioness_tsv_to_feather:
+#     input:
+#         ANY_LIONESS_TSV
+#     output:
+#         ANY_LIONESS_FEATHER,
+#         ANY_INDEGREE_FEATHER,
+#         ANY_OUTDEGREE_FEATHER,
+#     script:
+#         'scripts/process_lioness_tsv.py'

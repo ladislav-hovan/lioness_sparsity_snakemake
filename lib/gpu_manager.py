@@ -5,6 +5,7 @@ import random
 
 from collections import Counter
 from contextlib import contextmanager
+from pathlib import Path
 from pytools.persistent_dict import PersistentDict
 from typing import Generator, Iterable
 
@@ -17,6 +18,8 @@ class GpuManager:
     def __init__(
         self, 
         gpus: Iterable,
+        identifier: str = '.gpu_manager',
+        container_dir: Path = '.snakemake',
     ):
         """
         Initiates a GPU manager. Stores the values in a persistent
@@ -27,9 +30,15 @@ class GpuManager:
         ----------
         gpus : Iterable
             An Iterable of GPU IDs to use, can contain duplicates
+        identifier : str, optional
+            An identifier for the persistent dictionary,
+            by default '.gpu_manager'
+        container_dir : Path, optional
+            Path to the directory which will contain the dictionary,
+            by default '.snakemake'
         """
 
-        self._gpus = PersistentDict('.gpu_manager', container_dir='.snakemake')
+        self._gpus = PersistentDict(identifier, container_dir=container_dir)
         self.free_gpus = Counter(gpus)
         self.allocated_gpus = Counter()
 

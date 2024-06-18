@@ -5,19 +5,21 @@ configfile: 'config.yaml'
 ### Imports and setup ###
 import os
 
+from pathlib import Path
+
 global_resources = workflow.global_resources
 
+GPU_GUARD = os.path.join('.snakemake', '.gpu_guard')
+
 if 'gpus' in global_resources and global_resources['gpus'] > 0:
-    assert global_resources['gpus'] == len(config['gpu_ids']), (
-        'The number of GPUs in resources must match the length of provided '
-        'GPU ids')
+    if not os.path.exists(GPU_GUARD) or (os.path.getmtime(GPU_GUARD) <
+        os.path.getmtime(os.path.join('.snakemake', 'log'))):
+        assert global_resources['gpus'] == len(config['gpu_ids']), (
+            'The number of GPUs in resources must match the length of '
+            'provided GPU IDs')
+        Path(GPU_GUARD).touch()
 
     USE_GPU = True
-
-    import cupy as cp
-
-    gpu_devices = [cp.cuda.Device(i) for i in 
-        range(cp.cuda.runtime.getDeviceCount())]
 
     from lib.gpu_manager import GpuManager, allocate_gpus
 
@@ -25,35 +27,17 @@ if 'gpus' in global_resources and global_resources['gpus'] > 0:
 else:
     USE_GPU = False
 
-    gpu_manager = None
-    allocate_gpus = None
-
 ### Configuration variables ###
 input_dir = config['input_dir']
 
 ### Input and output variables ###
-include: 'variables.smk'
+include: os.path.join('workflow', 'variables.smk')
 
 ### Rules ###
 rule all:
     input:
         SUMMARY_CORR_PLOTS,
         COEXPR_ERROR_PLOTS,
-        # expand(
-        #     os.path.join('coexpression_networks', '{transform}', 
-        #         '{method}', '{sparsity}', '{repeat}', 'lioness.feather'),
-        #     transform=config['transformations'],
-        #     method=config['sparsifying_methods'],
-        #     sparsity=config['sparsity_levels'],
-        #     repeat=range(config['n_repeats']),
-        # ),
-        # expand(
-        #     os.path.join('coexpression_correlations', '{transform}', 
-        #         '{method}', '{sparsity}', 'pearson.npy'),
-        #     transform=config['transformations'],
-        #     method=config['sparsifying_methods'],
-        #     sparsity=config['sparsity_levels'],
-        # ),
     default_target:
         True
 
@@ -61,10 +45,10 @@ rule all:
 # TODO: Make sure the scripts are command line callable as well
 # TODO: Effectively implement one main function that's called with arguments
 
-include: 'expression.smk'
+include: os.path.join('workflow', 'expression.smk')
 
-include: 'networks.smk'
+include: os.path.join('workflow', 'networks.smk')
 
-include: 'correlations.smk'
+include: os.path.join('workflow', 'correlations.smk')
 
-include: 'plotting.smk'
+include: os.path.join('workflow', 'plotting.smk')

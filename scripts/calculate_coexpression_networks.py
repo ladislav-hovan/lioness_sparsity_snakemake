@@ -33,6 +33,7 @@ def create_lioness_networks(
 
 ### Main body ###
 dir_path = os.path.split(snakemake.output[0])[0]
+
 # Prepare LIONESS options
 input_options = {
     'expression': snakemake.input[0],
@@ -46,6 +47,7 @@ input_options = {
         'ncores': snakemake.threads,
     },
 }
+
 # Run LIONESS
 if use_gpu:
     gpu_devices = [cp.cuda.Device(i) for i in range(4)]
@@ -57,6 +59,7 @@ if use_gpu:
             create_lioness_networks(**input_options)
 else:
     create_lioness_networks(**input_options)
+
 # Convert the generated .npy file to .feather with the right index
 genes = pd.read_csv(snakemake.input[0], sep='\t', header=None, 
     index_col=0).index
@@ -64,6 +67,8 @@ mi = pd.MultiIndex.from_product([genes] * 2, names=['gene1', 'gene2'])
 npy_path = os.path.join(dir_path, 'lioness.npy')
 data = np.load(npy_path)
 df = pd.DataFrame(data, index=mi)
+df.columns = [str(i + 1) for i in df.columns]
 df.reset_index().to_feather(snakemake.output[0])
+
 # Remove the superfluous .npy file
 os.remove(npy_path)

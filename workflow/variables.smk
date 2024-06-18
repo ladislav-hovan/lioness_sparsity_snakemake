@@ -67,6 +67,8 @@ C_LIONESS_TSV = os.path.join('lioness_networks', '{transform}', 'control',
     '{repeat}', 'lioness.tsv')
 ANY_LIONESS_TSV = os.path.join('lioness_networks', '{path_to_dir}', 
     'lioness.tsv')
+C_LIONESS_FEATHER_SINGLE = os.path.join('lioness_networks', '{transform}', 
+    'control', '{repeat}', 'lioness.feather')
 
 ANY_EXPRESSION_FILE = os.path.join('{path_to_dir_1}', 
     'raw_expression{path_to_dir_2}', 'expression{repeat}.tsv')
