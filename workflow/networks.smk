@@ -1,3 +1,5 @@
+from scripts.calculate_lioness_networks import calculate_lioness_networks
+
 rule calculate_lioness_networks:
     input:
         S_ANY_EXPRESSION_FILE,
@@ -10,9 +12,6 @@ rule calculate_lioness_networks:
     resources:
         gpus = int(USE_GPU)
     run:
-        from scripts.calculate_lioness_networks import (
-            calculate_lioness_networks)
-
         if resources['gpus'] > 0:
             with allocate_gpus(gpu_manager,
                 resources['gpus']) as gpu_ids:
@@ -34,9 +33,6 @@ rule calculate_baseline_networks:
     resources:
         gpus = int(USE_GPU)
     run:
-        from scripts.calculate_lioness_networks import (
-            calculate_lioness_networks)
-
         if resources['gpus'] > 0:
             with allocate_gpus(gpu_manager,
                 resources['gpus']) as gpu_ids:
@@ -58,9 +54,6 @@ rule calculate_control_networks:
     resources:
         gpus = int(USE_GPU)
     run:
-        from scripts.calculate_lioness_networks import (
-            calculate_lioness_networks)
-
         if resources['gpus'] > 0:
             with allocate_gpus(gpu_manager,
                 resources['gpus']) as gpu_ids:
@@ -79,9 +72,8 @@ rule calculate_coexpression_networks:
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
-        gpus = int(USE_GPU)
-    # params:
-    #     gpu_manager = gpu_manager
+        mem_gb = 150,
+        gpus = int(USE_GPU),
     script:
         'scripts/calculate_coexpression_networks.py'
 
@@ -96,9 +88,8 @@ rule calculate_baseline_coexpression_networks:
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
-        gpus = int(USE_GPU)
-    # params:
-    #     gpu_manager = gpu_manager
+        mem_gb = 150,
+        gpus = int(USE_GPU),
     script:
         'scripts/calculate_coexpression_networks.py'  
 
@@ -113,9 +104,8 @@ rule calculate_control_coexpression_networks:
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
-        gpus = int(USE_GPU)
-    # params:
-    #     gpu_manager = gpu_manager
+        mem_gb = 150,
+        gpus = int(USE_GPU),
     script:
         'scripts/calculate_coexpression_networks.py'
 

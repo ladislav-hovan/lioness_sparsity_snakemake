@@ -4,26 +4,37 @@ configfile: 'config.yaml'
 
 ### Imports and setup ###
 import os
+import pickle
 
 from pathlib import Path
 
+from lib.functions_helper import get_most_recent_log_time
+
 global_resources = workflow.global_resources
 
-GPU_GUARD = os.path.join('.snakemake', '.gpu_guard')
-
 if 'gpus' in global_resources and global_resources['gpus'] > 0:
-    if not os.path.exists(GPU_GUARD) or (os.path.getmtime(GPU_GUARD) <
-        os.path.getmtime(os.path.join('.snakemake', 'log'))):
+    from lib.gpu_manager import GpuManager, allocate_gpus
+
+    GPU_GUARD = os.path.join('.snakemake', '.gpu_guard')
+    GPU_MANAGER = os.path.join('.snakemake', '.gpu_manager.pkl')
+
+    if (not os.path.exists(GPU_GUARD) or 
+        get_most_recent_log_time() > os.path.getmtime(GPU_GUARD)):
+        print ('Running one-time GPU checks and setting up the manager')
+
         assert global_resources['gpus'] == len(config['gpu_ids']), (
             'The number of GPUs in resources must match the length of '
             'provided GPU IDs')
+
+        gpu_manager = GpuManager(config['gpu_ids'])
+
+        pickle.dump(gpu_manager, open(GPU_MANAGER, 'wb'))
+
         Path(GPU_GUARD).touch()
+    else:
+        gpu_manager = pickle.load(open(GPU_MANAGER, 'rb'))
 
     USE_GPU = True
-
-    from lib.gpu_manager import GpuManager, allocate_gpus
-
-    gpu_manager = GpuManager(config['gpu_ids'])
 else:
     USE_GPU = False
 

@@ -6,7 +6,7 @@ rule calculate_expression_correlations:
         EXPR_CORR_PEARSON,
         EXPR_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_expression_correlations_control:
     input:
@@ -16,7 +16,7 @@ rule calculate_expression_correlations_control:
         C_EXPR_CORR_PEARSON,
         C_EXPR_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_correlations:
     input:
@@ -33,7 +33,7 @@ rule calculate_coexpression_correlations:
         os.path.join('coexpression_correlations', '{transform}', 
             '{method}', '{sparsity}', 'spearman.npy'),
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_correlations_control:
     input:
@@ -50,7 +50,7 @@ rule calculate_coexpression_correlations_control:
         os.path.join('coexpression_correlations', '{transform}', 
             'control', 'spearman.npy'),
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_network_correlations:
     input:
@@ -66,8 +66,10 @@ rule calculate_coexpression_network_correlations:
             '{method}', '{sparsity}', 'pearson.npy'),
         os.path.join('coexpression_network_correlations', '{transform}', 
             '{method}', '{sparsity}', 'spearman.npy'),
+    resources:
+        mem_gb = 150
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_network_correlations_control:
     input:
@@ -83,8 +85,10 @@ rule calculate_coexpression_network_correlations_control:
             'control', 'pearson.npy'),
         os.path.join('coexpression_network_correlations', '{transform}', 
             'control', 'spearman.npy'),
+    resources:
+        mem_gb = 150
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_error:
     input:
@@ -93,7 +97,7 @@ rule calculate_coexpression_error:
     output:
         COEXPR_ERROR
     script:
-        'scripts/calculate_coexpression_error.py'
+        os.path.join('..', 'scripts', 'calculate_coexpression_error.py')
 
 rule calculate_indegree_correlations:
     input:
@@ -103,7 +107,7 @@ rule calculate_indegree_correlations:
         IND_CORR_PEARSON,
         IND_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_indegree_correlations_control:
     input:
@@ -113,7 +117,7 @@ rule calculate_indegree_correlations_control:
         C_IND_CORR_PEARSON,
         C_IND_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_edge_correlations:
     input:
@@ -123,7 +127,7 @@ rule calculate_edge_correlations:
         EDGE_CORR_PEARSON,
         EDGE_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_edge_correlations_control:
     input:
@@ -133,4 +137,4 @@ rule calculate_edge_correlations_control:
         C_EDGE_CORR_PEARSON,
         C_EDGE_CORR_SPEARMAN,
     script:
-        'scripts/calculate_correlations.py'
+        os.path.join('..', 'scripts', 'calculate_correlations.py')
