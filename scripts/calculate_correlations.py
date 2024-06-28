@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 
-from lib.functions_io import load_file
+from lib.functions import load_file
 
 ### Main body ###
 baseline_df = load_file(snakemake.input[0])

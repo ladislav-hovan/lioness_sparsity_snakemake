@@ -1,11 +1,43 @@
 #!/usr/bin/env python
 
 ### Imports ###
-import pandas as pd
+from pathlib import Path
 
-from lib.functions_io import load_file
+from lib.functions import load_file
+
+### Functions ###
+def calculate_coexpression_matrix(
+    expression: Path,
+    output: Path,
+) -> None:
+    """
+    Calculates the coexpression matrix from the given gene expression.
+
+    Parameters
+    ----------
+    expression : Path
+        A file containing the gene expression
+    output : Path
+        The path where the coexpression matrix will be saved
+    """
+
+    df = load_file(expression)
+    coexpr_df = df.T.corr()
+    coexpr_df.reset_index().to_feather(output)
 
 ### Main body ###
-df = load_file(snakemake.input[0])
-coexpr_df = df.T.corr()
-coexpr_df.reset_index().to_feather(snakemake.output[0])
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument('-e', '--expression', dest='expression',
+        help='file to load the gene expression from', metavar='FILE')
+    parser.add_argument('-o', '--output', dest='output',
+        help='file to save the coexpression matrix into', metavar='FEATHER')
+
+    parser.parse_args()
+
+    calculate_coexpression_matrix(
+        parser.expression,
+        parser.output,
+    )

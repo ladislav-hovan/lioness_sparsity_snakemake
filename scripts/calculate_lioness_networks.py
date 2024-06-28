@@ -6,45 +6,12 @@ import os
 import numpy as np
 import pandas as pd
 
-from netZooPy.lioness import Lioness
-from netZooPy.panda import Panda
 from pathlib import Path
 from typing import Optional
 
+from lib.functions import create_lioness_networks
+
 ### Functions ###
-def create_lioness_networks(
-    expression: pd.DataFrame,
-    motif_prior: pd.DataFrame,
-    ppi_prior: pd.DataFrame,
-    output_dir: str,
-    computing: str,
-    lioness_options: dict,
-) -> None:
-    """
-
-
-    Parameters
-    ----------
-    expression : pd.DataFrame
-        _description_
-    motif_prior : pd.DataFrame
-        _description_
-    ppi_prior : pd.DataFrame
-        _description_
-    output_dir : str
-        _description_
-    computing : str
-        _description_
-    lioness_options : dict
-        _description_
-    """
-    
-    panda_obj = Panda(expression, motif_prior, ppi_prior, computing=computing, 
-        save_memory=False, keep_expression_matrix=True)
-    _ = Lioness(panda_obj, computing=computing, save_dir=output_dir, 
-        save_fmt='npy', **lioness_options)
-
-
 def calculate_lioness_networks(
     expression: Path,
     motif_prior: Path,
@@ -55,24 +22,27 @@ def calculate_lioness_networks(
     threads: int = 1,
 ) -> None:
     """
-    
+    Calculates LIONESS networks based on the provided files using
+    the provided settings.
 
     Parameters
     ----------
     expression : Path
-        _description_
+        A path to the file containing the expression data
     motif_prior : Path
-        _description_
+        A path to the file containing the gene regulation prior
     ppi_prior : Path
-        _description_
+        A path to the file containing the PPI prior
     output : Path
-        _description_
+        A path to the output file
     n_networks : int
-        _description_
+        The number of networks to be generated, first n_networks samples
+        will be used
     gpu_id : Optional[int], optional
-        _description_, by default None
+        The GPU ID to use or None to not use GPUs, by default None
     threads : int, optional
-        _description_, by default 1
+        The number of threads to use, only relevant when no GPU ID is
+        provided, by default 1
     """
 
     dir_path = os.path.split(output)[0]

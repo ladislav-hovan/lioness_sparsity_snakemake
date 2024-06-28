@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 ### Imports ###
-import bisect
-
 import numpy as np
 import pandas as pd
 

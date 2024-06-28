@@ -8,7 +8,7 @@ import pickle
 
 from pathlib import Path
 
-from lib.functions_helper import get_most_recent_log_time
+from lib.functions import get_most_recent_log_time
 
 global_resources = workflow.global_resources
 
@@ -18,7 +18,7 @@ if 'gpus' in global_resources and global_resources['gpus'] > 0:
     GPU_GUARD = os.path.join('.snakemake', '.gpu_guard')
     GPU_MANAGER = os.path.join('.snakemake', '.gpu_manager.pkl')
 
-    if (not os.path.exists(GPU_GUARD) or 
+    if (not os.path.exists(GPU_GUARD) or
         get_most_recent_log_time() > os.path.getmtime(GPU_GUARD)):
         print ('Running one-time GPU checks and setting up the manager')
 

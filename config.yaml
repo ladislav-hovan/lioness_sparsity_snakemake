@@ -1,5 +1,5 @@
 random_seed: 42
-input_dir: 'input/'
+input_dir: 'input'
 expression_file: 'expression_tcga_brca_raw_nohead.tsv'
 motif_file: 'motif_prior.tsv'
 ppi_file: 'ppi_prior.tsv'

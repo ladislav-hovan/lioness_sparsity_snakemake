@@ -38,7 +38,7 @@ rule mark_zero_expression_genes:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('sparse_expression', '{method}', '{sparsity}', 
+        os.path.join('sparse_expression', '{method}', '{sparsity}',
             'mark_zero_{repeat}.tsv')
     script:
         'scripts/mark_zero_expression_genes.py'
@@ -47,7 +47,7 @@ rule mark_top_half_expression_genes:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('sparse_expression', '{method}', '{sparsity}', 
+        os.path.join('sparse_expression', '{method}', '{sparsity}',
             'mark_top_half_{repeat}.tsv')
     script:
         'scripts/mark_top_half_expression_genes.py'

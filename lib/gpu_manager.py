@@ -11,12 +11,12 @@ from typing import Generator, Iterable
 
 class GpuManager:
     """
-    Manages GPUs keep track of which GPUs are free and which are 
+    Manages GPUs keep track of which GPUs are free and which are
     allocated.
     """
 
     def __init__(
-        self, 
+        self,
         gpus: Iterable,
         identifier: str = '.gpu_manager',
         container_dir: Path = '.snakemake',
@@ -46,15 +46,15 @@ class GpuManager:
     @property
     def free_gpus(
         self,
-    ):    
+    ):
         return self._gpus.fetch('free_gpus')
 
 
     @free_gpus.setter
     def free_gpus(
-        self, 
+        self,
         value: Counter,
-    ):        
+    ):
         self._gpus.store('free_gpus', value)
 
 
@@ -67,14 +67,14 @@ class GpuManager:
 
     @allocated_gpus.setter
     def allocated_gpus(
-        self, 
+        self,
         value: Counter,
-    ):    
+    ):
         self._gpus.store('allocated_gpus', value)
 
 
     def acquire(
-        self, 
+        self,
         num_gpus: int,
     ) -> list:
         """
@@ -114,7 +114,7 @@ class GpuManager:
 
 
     def release(
-        self, 
+        self,
         gpus: Iterable,
     ):
         """
@@ -125,18 +125,18 @@ class GpuManager:
         gpus : Iterable
             An Iterable of GPU labels to be made available again
         """
-        
+
         self.free_gpus = self.free_gpus + Counter(gpus)
         self.allocated_gpus = self.allocated_gpus - Counter(gpus)
 
 
 @contextmanager
 def allocate_gpus(
-    gpu_manager: GpuManager, 
+    gpu_manager: GpuManager,
     num_gpus: int,
 ) -> Generator:
     """
-    Allocates several GPUs from the GPU manager and releases them when 
+    Allocates several GPUs from the GPU manager and releases them when
     done.
 
     Parameters
