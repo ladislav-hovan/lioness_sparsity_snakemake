@@ -11,7 +11,7 @@ rule calculate_lioness_networks:
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
-        S_LIONESS_FEATHER_SINGLE,
+        S_LIONESS_FEATHER_SINGLE
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
@@ -32,7 +32,7 @@ rule calculate_baseline_networks:
         F_MOTIF_FILE,
         F_PPI_FILE,
     output:
-        BL_LIONESS_FEATHER_SINGLE
+        BL_LIONESS_FEATHER
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
@@ -72,8 +72,7 @@ rule calculate_coexpression_networks:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_networks', '{transform}',
-            '{method}', '{sparsity}', '{repeat}', 'lioness.feather')
+        S_COEXPR_NET_SINGLE
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
@@ -91,10 +90,9 @@ rule calculate_coexpression_networks:
 
 rule calculate_baseline_coexpression_networks:
     input:
-        F_TRANS_EXPRESSION_FILE,
+        F_TRANS_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_networks', '{transform}',
-            'baseline', 'lioness.feather')
+        BL_COEXPR_NET
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
@@ -112,10 +110,9 @@ rule calculate_baseline_coexpression_networks:
 
 rule calculate_control_coexpression_networks:
     input:
-        C_TRANS_EXPRESSION_FILE,
+        C_TRANS_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_networks', '{transform}',
-            'control', '{repeat}', 'lioness.feather')
+        C_COEXPR_NET_SINGLE
     threads:
         1 if USE_GPU else config['lioness_threads']
     resources:
@@ -135,8 +132,7 @@ rule calculate_coexpression_matrix:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_matrices', '{transform}', '{method}',
-            '{sparsity}', 'coexpression_{repeat}.feather')
+        S_COEXPR_MAT_SINGLE
     run:
         calculate_coexpression_matrix(input[0], output[0])
 
@@ -144,8 +140,7 @@ rule calculate_baseline_coexpression_matrix:
     input:
         F_TRANS_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_matrices', '{transform}', 'baseline',
-            'coexpression.feather')
+        BL_COEXPR_MAT
     run:
         calculate_coexpression_matrix(input[0], output[0])
 
@@ -153,8 +148,7 @@ rule calculate_control_coexpression_matrix:
     input:
         C_TRANS_EXPRESSION_FILE
     output:
-        os.path.join('coexpression_matrices', '{transform}', 'control',
-            'coexpression_{repeat}.feather')
+        C_COEXPR_MAT_SINGLE
     run:
         calculate_coexpression_matrix(input[0], output[0])
 

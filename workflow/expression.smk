@@ -1,3 +1,5 @@
+from scripts.filter_expression_and_priors import filter_expression_and_priors
+
 rule filter_expression_and_priors:
     input:
         EXPRESSION_FILE,
@@ -7,8 +9,9 @@ rule filter_expression_and_priors:
         F_EXPRESSION_FILE,
         F_MOTIF_FILE,
         F_PPI_FILE,
-    script:
-        'scripts/filter_expression_and_priors.py'
+    run:
+        filter_expression_and_priors(input[0], input[1], input[2],
+            output[0], output[1], output[2])
 
 rule resample_reads:
     input:
@@ -38,18 +41,18 @@ rule mark_zero_expression_genes:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('sparse_expression', '{method}', '{sparsity}',
-            'mark_zero_{repeat}.tsv')
+        ZERO_GENES_MARK
     script:
+        # TODO: Implement
         'scripts/mark_zero_expression_genes.py'
 
 rule mark_top_half_expression_genes:
     input:
         S_ANY_EXPRESSION_FILE
     output:
-        os.path.join('sparse_expression', '{method}', '{sparsity}',
-            'mark_top_half_{repeat}.tsv')
+        TOP_HALF_GENES_MARK
     script:
+        # TODO: Implement
         'scripts/mark_top_half_expression_genes.py'
 
 rule rescale_filtered_expression_log1p:

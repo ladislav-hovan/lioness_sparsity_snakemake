@@ -20,52 +20,31 @@ rule calculate_expression_correlations_control:
 
 rule calculate_coexpression_correlations:
     input:
-        os.path.join('coexpression_matrices', '{transform}', 'baseline',
-            'coexpression.feather'),
-        expand(
-            os.path.join('coexpression_matrices', '{{transform}}',
-                '{{method}}', '{{sparsity}}', 'coexpression_{repeat}.feather'),
-            repeat=range(config['n_repeats']),
-        ),
+        BL_COEXPR_MAT,
+        COEXPR_MATS,
     output:
-        os.path.join('coexpression_correlations', '{transform}',
-            '{method}', '{sparsity}', 'pearson.npy'),
-        os.path.join('coexpression_correlations', '{transform}',
-            '{method}', '{sparsity}', 'spearman.npy'),
+        COEXPR_MAT_CORR_PEARSON,
+        COEXPR_MAT_CORR_SPEARMAN,
     script:
         os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_correlations_control:
     input:
-        os.path.join('coexpression_matrices', '{transform}', 'baseline',
-            'coexpression.feather'),
-        expand(
-            os.path.join('coexpression_matrices', '{{transform}}',
-                'control', 'coexpression_{repeat}.feather'),
-            repeat=range(config['n_repeats']),
-        ),
+        BL_COEXPR_MAT,
+        C_COEXPR_MATS,
     output:
-        os.path.join('coexpression_correlations', '{transform}',
-            'control', 'pearson.npy'),
-        os.path.join('coexpression_correlations', '{transform}',
-            'control', 'spearman.npy'),
+        C_COEXPR_MAT_CORR_PEARSON,
+        C_COEXPR_MAT_CORR_SPEARMAN,
     script:
         os.path.join('..', 'scripts', 'calculate_correlations.py')
 
 rule calculate_coexpression_network_correlations:
     input:
-        os.path.join('coexpression_networks', '{transform}', 'baseline',
-            'lioness.feather'),
-        expand(
-            os.path.join('coexpression_networks', '{{transform}}',
-                '{{method}}', '{{sparsity}}', '{repeat}', 'lioness.feather'),
-            repeat=range(config['n_repeats']),
-        ),
+        BL_COEXPR_NET,
+        COEXPR_NETS,
     output:
-        os.path.join('coexpression_network_correlations', '{transform}',
-            '{method}', '{sparsity}', 'pearson.npy'),
-        os.path.join('coexpression_network_correlations', '{transform}',
-            '{method}', '{sparsity}', 'spearman.npy'),
+        COEXPR_NET_CORR_PEARSON,
+        COEXPR_NET_CORR_SPEARMAN,
     resources:
         mem_gb = 150
     script:
@@ -73,18 +52,11 @@ rule calculate_coexpression_network_correlations:
 
 rule calculate_coexpression_network_correlations_control:
     input:
-        os.path.join('coexpression_networks', '{transform}', 'baseline',
-            'lioness.feather'),
-        expand(
-            os.path.join('coexpression_networks', '{{transform}}', 'control',
-                '{repeat}', 'lioness.feather'),
-            repeat=range(config['n_repeats']),
-        ),
+        BL_COEXPR_NET,
+        C_COEXPR_NETS,
     output:
-        os.path.join('coexpression_network_correlations', '{transform}',
-            'control', 'pearson.npy'),
-        os.path.join('coexpression_network_correlations', '{transform}',
-            'control', 'spearman.npy'),
+        C_COEXPR_NET_CORR_PEARSON,
+        C_COEXPR_NET_CORR_SPEARMAN,
     resources:
         mem_gb = 150
     script:

@@ -57,11 +57,16 @@ C_TRANS_EXPRESSION_FILES = expand(
 C_TRANS_EXPRESSION_FILE = os.path.join('control_expression', '{transform}',
     'expression_{repeat}.tsv')
 
+ZERO_GENES_MARK = os.path.join('sparse_expression', '{method}', '{sparsity}',
+    'mark_zero_{repeat}.tsv')
+TOP_HALF_GENES_MARK = os.path.join('sparse_expression', '{method}',
+    '{sparsity}', 'mark_top_half_{repeat}.tsv')
+
 S_ANY_EXPRESSION_FILE = os.path.join('sparse_expression', '{transform}',
     '{method}', '{sparsity}', 'expression_{repeat}.tsv')
 S_LIONESS_FEATHER_SINGLE = os.path.join('lioness_networks', '{transform}',
     '{method}', '{sparsity}', '{repeat}', 'lioness.feather')
-BL_LIONESS_FEATHER_SINGLE = os.path.join('lioness_networks', '{transform}',
+BL_LIONESS_FEATHER = os.path.join('lioness_networks', '{transform}',
     'baseline', 'lioness.feather')
 C_LIONESS_FEATHER_SINGLE = os.path.join('lioness_networks', '{transform}',
     'control', '{repeat}', 'lioness.feather')
@@ -77,6 +82,20 @@ ANY_INDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}',
     'indegrees.feather')
 ANY_OUTDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}',
     'outdegrees.feather')
+
+S_COEXPR_NET_SINGLE = os.path.join('coexpression_networks', '{transform}',
+    '{method}', '{sparsity}', '{repeat}', 'lioness.feather')
+BL_COEXPR_NET = os.path.join('coexpression_networks', '{transform}',
+    'baseline', 'lioness.feather')
+C_COEXPR_NET_SINGLE = os.path.join('coexpression_networks', '{transform}',
+    'control', '{repeat}', 'lioness.feather')
+
+S_COEXPR_MAT_SINGLE = os.path.join('coexpression_matrices', '{transform}',
+    '{method}', '{sparsity}', 'coexpression_{repeat}.feather')
+BL_COEXPR_MAT = os.path.join('coexpression_matrices', '{transform}',
+    'baseline', 'coexpression.feather')
+C_COEXPR_MAT_SINGLE = os.path.join('coexpression_matrices', '{transform}',
+    'control', 'coexpression_{repeat}.feather')
 
 S_ANY_EXPRESSION_FILES = expand(
     os.path.join('sparse_expression', '{{transform}}', '{{method}}',
@@ -145,6 +164,48 @@ C_EDGE_CORR_PEARSON = os.path.join('edge_correlations', '{transform}',
     'control', 'pearson.npy')
 C_EDGE_CORR_SPEARMAN = os.path.join('edge_correlations', '{transform}',
     'control', 'spearman.npy')
+
+COEXPR_MATS = expand(
+    os.path.join('coexpression_matrices', '{{transform}}',
+        '{{method}}', '{{sparsity}}', 'coexpression_{repeat}.feather'),
+    repeat=range(config['n_repeats']),
+)
+C_COEXPR_MATS = expand(
+    os.path.join('coexpression_matrices', '{{transform}}',
+        'control', 'coexpression_{repeat}.feather'),
+    repeat=range(config['n_repeats']),
+)
+
+COEXPR_MAT_CORR_PEARSON = os.path.join('coexpression_correlations',
+    '{transform}', '{method}', '{sparsity}', 'pearson.npy')
+COEXPR_MAT_CORR_SPEARMAN = os.path.join('coexpression_correlations',
+    '{transform}', '{method}', '{sparsity}', 'spearman.npy')
+
+C_COEXPR_MAT_CORR_PEARSON = os.path.join('coexpression_correlations',
+    '{transform}', 'control', 'pearson.npy')
+C_COEXPR_MAT_CORR_SPEARMAN = os.path.join('coexpression_correlations',
+    '{transform}', 'control', 'spearman.npy')
+
+COEXPR_NETS = expand(
+    os.path.join('coexpression_networks', '{{transform}}',
+        '{{method}}', '{{sparsity}}', '{repeat}', 'lioness.feather'),
+    repeat=range(config['n_repeats']),
+)
+C_COEXPR_NETS = expand(
+    os.path.join('coexpression_networks', '{{transform}}', 'control',
+        '{repeat}', 'lioness.feather'),
+    repeat=range(config['n_repeats']),
+)
+
+COEXPR_NET_CORR_PEARSON = os.path.join('coexpression_network_correlations',
+    '{transform}', '{method}', '{sparsity}', 'pearson.npy')
+COEXPR_NET_CORR_SPEARMAN = os.path.join('coexpression_network_correlations',
+    '{transform}', '{method}', '{sparsity}', 'spearman.npy')
+
+C_COEXPR_NET_CORR_PEARSON = os.path.join('coexpression_network_correlations',
+    '{transform}', 'control', 'pearson.npy')
+C_COEXPR_NET_CORR_SPEARMAN = os.path.join('coexpression_network_correlations',
+    '{transform}', 'control', 'spearman.npy')
 
 CONTROL_FILES = os.path.join('{data_type}_correlations', '{transform}',
     'control', '{corr}.npy')
