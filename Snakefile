@@ -58,7 +58,12 @@ rule all:
 
 include: os.path.join('workflow', 'expression.smk')
 
-include: os.path.join('workflow', 'networks.smk')
+include: os.path.join('workflow', 'networks_common.smk')
+
+if USE_GPU:
+    include: os.path.join('workflow', 'networks_gpu.smk')
+else:
+    include: os.path.join('workflow', 'networks_cpu.smk')
 
 include: os.path.join('workflow', 'correlations.smk')
 
