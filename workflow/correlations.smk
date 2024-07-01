@@ -1,3 +1,6 @@
+from scripts.calculate_coexpression_error import calculate_coexpression_error
+from scripts.calculate_correlations import calculate_correlations
+
 rule calculate_expression_correlations:
     input:
         F_TRANS_EXPRESSION_FILE,
@@ -5,8 +8,8 @@ rule calculate_expression_correlations:
     output:
         EXPR_CORR_PEARSON,
         EXPR_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_expression_correlations_control:
     input:
@@ -15,8 +18,8 @@ rule calculate_expression_correlations_control:
     output:
         C_EXPR_CORR_PEARSON,
         C_EXPR_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_coexpression_correlations:
     input:
@@ -25,8 +28,8 @@ rule calculate_coexpression_correlations:
     output:
         COEXPR_MAT_CORR_PEARSON,
         COEXPR_MAT_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_coexpression_correlations_control:
     input:
@@ -35,8 +38,8 @@ rule calculate_coexpression_correlations_control:
     output:
         C_COEXPR_MAT_CORR_PEARSON,
         C_COEXPR_MAT_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_coexpression_network_correlations:
     input:
@@ -47,8 +50,8 @@ rule calculate_coexpression_network_correlations:
         COEXPR_NET_CORR_SPEARMAN,
     resources:
         mem_gb = 150
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_coexpression_network_correlations_control:
     input:
@@ -59,8 +62,8 @@ rule calculate_coexpression_network_correlations_control:
         C_COEXPR_NET_CORR_SPEARMAN,
     resources:
         mem_gb = 150
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_coexpression_error:
     input:
@@ -68,8 +71,8 @@ rule calculate_coexpression_error:
         S_ANY_EXPRESSION_FILES,
     output:
         COEXPR_ERROR
-    script:
-        os.path.join('..', 'scripts', 'calculate_coexpression_error.py')
+    run:
+        calculate_coexpression_error(input[0], input[1:], output[0])
 
 rule calculate_indegree_correlations:
     input:
@@ -78,8 +81,8 @@ rule calculate_indegree_correlations:
     output:
         IND_CORR_PEARSON,
         IND_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_indegree_correlations_control:
     input:
@@ -88,8 +91,8 @@ rule calculate_indegree_correlations_control:
     output:
         C_IND_CORR_PEARSON,
         C_IND_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_edge_correlations:
     input:
@@ -98,8 +101,8 @@ rule calculate_edge_correlations:
     output:
         EDGE_CORR_PEARSON,
         EDGE_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
 
 rule calculate_edge_correlations_control:
     input:
@@ -108,5 +111,5 @@ rule calculate_edge_correlations_control:
     output:
         C_EDGE_CORR_PEARSON,
         C_EDGE_CORR_SPEARMAN,
-    script:
-        os.path.join('..', 'scripts', 'calculate_correlations.py')
+    run:
+        calculate_correlations(input[0], input[1:], output[0], output[1])
