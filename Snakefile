@@ -52,10 +52,6 @@ rule all:
     default_target:
         True
 
-# TODO: Convert scripts to Python functions, call from here as run block
-# TODO: Make sure the scripts are command line callable as well
-# TODO: Effectively implement one main function that's called with arguments
-
 include: os.path.join('workflow', 'expression.smk')
 
 include: os.path.join('workflow', 'networks_common.smk')
