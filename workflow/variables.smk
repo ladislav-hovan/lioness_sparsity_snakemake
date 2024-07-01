@@ -207,7 +207,7 @@ C_COEXPR_NET_CORR_PEARSON = os.path.join('coexpression_network_correlations',
 C_COEXPR_NET_CORR_SPEARMAN = os.path.join('coexpression_network_correlations',
     '{transform}', 'control', 'spearman.npy')
 
-CONTROL_FILES = os.path.join('{data_type}_correlations', '{transform}',
+C_CORR_FILE = os.path.join('{data_type}_correlations', '{transform}',
     'control', '{corr}.npy')
 CORR_FILES = expand(
     os.path.join('{{data_type}}_correlations', '{{transform}}', '{{method}}',
@@ -217,6 +217,8 @@ CORR_FILES = expand(
 CORR_PLOT = os.path.join('plots', '{transform}', '{method}', '{data_type}',
     '{corr}_correlation.png')
 
+C_COEXPR_ERROR_FILE = os.path.join('coexpression_error', '{transform}',
+    'control', 'abs_error.npy')
 COEXPR_ERROR_FILES = expand(
     os.path.join('coexpression_error', '{{transform}}', '{{method}}',
         '{sparsity}', 'abs_error.npy'),

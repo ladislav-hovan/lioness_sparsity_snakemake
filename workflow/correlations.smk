@@ -65,6 +65,15 @@ rule calculate_coexpression_network_correlations_control:
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
 
+rule calculate_coexpression_error_control:
+    input:
+        F_TRANS_EXPRESSION_FILE,
+        C_TRANS_EXPRESSION_FILES,
+    output:
+        C_COEXPR_ERROR_FILE
+    run:
+        calculate_coexpression_error(input[0], input[1:], output[0])
+
 rule calculate_coexpression_error:
     input:
         F_TRANS_EXPRESSION_FILE,

@@ -1,16 +1,27 @@
+from scripts.plot_coexpression_error_by_sparsity import (
+    plot_coexpression_error_by_sparsity)
+from scripts.plot_correlation_by_sparsity import plot_correlation_by_sparsity
+
 rule plot_correlation_by_sparsity:
     input:
-        CONTROL_FILES,
+        C_CORR_FILE,
         CORR_FILES,
     output:
         CORR_PLOT
-    script:
-        os.path.join('..', 'scripts', 'plot_correlation_by_sparsity.py')
+    params:
+        sparsity_levels = config['sparsity_levels']
+    run:
+        plot_correlation_by_sparsity(input,
+            [0] + [float(i) for i in params['sparsity_levels']],
+            wildcards['corr'], output[0])
 
 rule plot_coexpression_error_by_sparsity:
     input:
-        COEXPR_ERROR_FILES
+        C_COEXPR_ERROR_FILE,
+        COEXPR_ERROR_FILES,
     output:
         COEXPR_ERROR_PLOT
-    script:
-        os.path.join('..', 'scripts', 'plot_coexpression_error_by_sparsity.py')
+    run:
+        plot_coexpression_error_by_sparsity(input,
+            [0] + [float(i) for i in params['sparsity_levels']],
+            output[0])

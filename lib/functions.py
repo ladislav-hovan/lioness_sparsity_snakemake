@@ -3,12 +3,13 @@ import glob
 import os
 import time
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from netZooPy.lioness import Lioness
 from netZooPy.panda import Panda
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional, Tuple
 
 ### Functions ###
 def load_file(
@@ -119,3 +120,24 @@ def create_lioness_networks(
         save_memory=False, keep_expression_matrix=True)
     _ = Lioness(panda_obj, computing=computing, save_dir=output_dir,
         save_fmt='npy', **lioness_options)
+
+
+def plot_boxplots(
+    data: pd.DataFrame,
+    corr_name: Optional[Literal['pearson', 'spearman']],
+    ylim: Tuple[float, float] = (0, 1),
+) -> Tuple[plt.Figure, plt.Axes]:
+
+    fig,ax = plt.subplots(figsize=(8,4))
+
+    ax.boxplot(data, labels=data.columns)
+    ax.set_ylim(ylim)
+    ax.set_xlabel('Sparsity % of expressed genes')
+    if corr_name is not None:
+        corr_name = corr_name[0].upper() + corr_name[1:]
+        ax.set_ylabel(f'{corr_name} R compared to no sparsity')
+    else:
+        ax.set_ylabel('Abs. coexpr. error compared to no sparsity')
+    ax.grid(axis='y')
+
+    return fig,ax
