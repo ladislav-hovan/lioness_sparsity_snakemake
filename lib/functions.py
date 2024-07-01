@@ -127,6 +127,24 @@ def plot_boxplots(
     corr_name: Optional[Literal['pearson', 'spearman']],
     ylim: Tuple[float, float] = (0, 1),
 ) -> Tuple[plt.Figure, plt.Axes]:
+    """
+    Plots the boxplot from the given data.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        pandas DataFrame containing the data
+    corr_name : Optional[Literal['pearson', 'spearman']]
+        Which type of correlation was used to generate the data or None
+        it it is coexpression error
+    ylim : Tuple[float, float], optional
+        Limits of the y axis, by default (0, 1)
+
+    Returns
+    -------
+    Tuple[plt.Figure, plt.Axes]
+        matplotlib Figure and Axes of the generated plot
+    """
 
     fig,ax = plt.subplots(figsize=(8,4))
 
