@@ -20,22 +20,22 @@ def calculate_coexpression_networks(
     threads: int = 1,
 ) -> None:
     """
-    Calculates LIONESS gene coexpression networks based on the 
+    Calculates LIONESS gene coexpression networks based on the
     provided files using the provided settings.
 
     Parameters
     ----------
     expression : Path
-        A path to the file containing the expression data
+        Path to the file containing the expression data
     output : Path
-        A path to the output file
+        Path to the output file
     n_networks : int
-        The number of networks to be generated, first n_networks samples
+        Number of networks to be generated, first n_networks samples
         will be used
     gpu_id : Optional[int], optional
-        The GPU ID to use or None to not use GPUs, by default None
+        GPU ID to use or None to not use GPUs, by default None
     threads : int, optional
-        The number of threads to use, only relevant when no GPU ID is
+        Number of threads to use, only relevant when no GPU ID is
         provided, by default 1
     """
 
@@ -65,7 +65,7 @@ def calculate_coexpression_networks(
         create_lioness_networks(**input_options)
 
     # Convert the generated .npy file to .feather with the right index
-    genes = pd.read_csv(expression, sep='\t', header=None, 
+    genes = pd.read_csv(expression, sep='\t', header=None,
         index_col=0).index
     mi = pd.MultiIndex.from_product([genes] * 2, names=['gene1', 'gene2'])
     npy_path = os.path.join(dir_path, 'lioness.npy')

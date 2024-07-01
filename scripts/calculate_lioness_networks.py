@@ -28,20 +28,20 @@ def calculate_lioness_networks(
     Parameters
     ----------
     expression : Path
-        A path to the file containing the expression data
+        Path to the file containing the expression data
     motif_prior : Path
-        A path to the file containing the gene regulation prior
+        Path to the file containing the gene regulation prior
     ppi_prior : Path
-        A path to the file containing the PPI prior
+        Path to the file containing the PPI prior
     output : Path
-        A path to the output file
+        Path to the output file
     n_networks : int
-        The number of networks to be generated, first n_networks samples
+        Number of networks to be generated, first n_networks samples
         will be used
     gpu_id : Optional[int], optional
-        The GPU ID to use or None to not use GPUs, by default None
+        GPU ID to use or None to not use GPUs, by default None
     threads : int, optional
-        The number of threads to use, only relevant when no GPU ID is
+        Number of threads to use, only relevant when no GPU ID is
         provided, by default 1
     """
 

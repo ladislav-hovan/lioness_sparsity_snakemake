@@ -16,9 +16,9 @@ def calculate_coexpression_matrix(
     Parameters
     ----------
     expression : Path
-        A file containing the gene expression
+        Path to a file containing the gene expression
     output : Path
-        The path where the coexpression matrix will be saved
+        Path where the coexpression matrix will be saved
     """
 
     df = load_file(expression)

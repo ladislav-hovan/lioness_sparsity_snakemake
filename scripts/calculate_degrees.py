@@ -20,11 +20,11 @@ def calculate_degrees(
     Parameters
     ----------
     lioness_feather : Path
-        The input feather file with the LIONESS networks
+        Path to the input feather file with the LIONESS networks
     ind_feather : Path
-        The output feather file with the calculated indegrees
+        Path to the output feather file with the calculated indegrees
     outd_feather : Path
-        The output feather file with the calculated outdegrees
+        Path to the output feather file with the calculated outdegrees
     """
 
     df = load_file(lioness_feather)
