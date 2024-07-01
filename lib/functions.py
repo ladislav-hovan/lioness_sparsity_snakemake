@@ -21,17 +21,17 @@ def load_file(
     Parameters
     ----------
     filename : Path
-        The path to the file of interest
+        Path to the file of interest
 
     Returns
     -------
     pd.DataFrame
-        The processed pandas DataFrame
+        Processed pandas DataFrame
 
     Raises
     ------
     ValueError
-        If the extension is neither tsv nor feather
+        If the extension is neither 'tsv' nor 'feather'
     """
 
     extension = filename.split('.')[-1]
@@ -72,7 +72,7 @@ def get_most_recent_log_time(
     Returns
     -------
     float
-        The time indicated in the most recent log file in epoch seconds
+        Time indicated in the most recent log file in epoch seconds
     """
 
     # Get the most recently modified log file
@@ -102,13 +102,13 @@ def create_lioness_networks(
     Parameters
     ----------
     expression : pd.DataFrame
-        A pandas DataFrame containing the expression data
+        pandas DataFrame containing the expression data
     motif_prior : pd.DataFrame
-        A pandas DataFrame containing the gene regulation prior
+        pandas DataFrame containing the gene regulation prior
     ppi_prior : pd.DataFrame
-        A pandas DataFrame containing the PPI prior
+        pandas DataFrame containing the PPI prior
     output_dir : Path
-        A path to a directory where the output file will be saved
+        Path to a directory where the output file will be saved
     computing : Literal["cpu", "gpu"]
         Which type of computing will be used
     lioness_options : dict

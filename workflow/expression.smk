@@ -1,4 +1,8 @@
+from scripts.downsample_reads import downsample_reads
 from scripts.filter_expression_and_priors import filter_expression_and_priors
+from scripts.generate_control_expression import generate_control_expression
+from scripts.resample_reads import resample_reads
+from scripts.rescale_expression_log1p import rescale_expression_log1p
 
 rule filter_expression_and_priors:
     input:
@@ -18,24 +22,36 @@ rule resample_reads:
         F_EXPRESSION_FILE
     output:
         S_RS_EXPRESSION_FILES
-    script:
-        'scripts/resample_reads.py'
+    params:
+        n_repeats = config['n_repeats'],
+        seed = config['random_seed'] if 'random_seed' in config else None,
+    run:
+        resample_reads(input[0], output, float(wildcards['sparsity']),
+            params['n_repeats'], params['seed'])
 
 rule downsample_reads:
     input:
         F_EXPRESSION_FILE
     output:
         S_DS_EXPRESSION_FILES
-    script:
-        'scripts/downsample_reads.py'
+    params:
+        n_repeats = config['n_repeats'],
+        seed = config['random_seed'] if 'random_seed' in config else None,
+    run:
+        downsample_reads(input[0], output, float(wildcards['sparsity']),
+            params['n_repeats'], params['seed'])
 
 rule generate_control_expression:
     input:
         F_EXPRESSION_FILE
     output:
         C_EXPRESSION_FILES
-    script:
-        'scripts/generate_control_expression.py'
+    params:
+        n_repeats = config['n_repeats'],
+        seed = config['random_seed'] if 'random_seed' in config else None,
+    run:
+        generate_control_expression(input[0], output, params['n_repeats'],
+            params['seed'])
 
 rule mark_zero_expression_genes:
     input:
@@ -64,5 +80,5 @@ rule rescale_filtered_expression_log1p:
         # Allow them to be empty as well
         repeat='.*',
         path_to_dir_2='.*',
-    script:
-        'scripts/rescale_expression_log1p.py'
+    run:
+        rescale_expression_log1p(input[0], output[0])
