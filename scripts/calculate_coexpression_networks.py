@@ -93,12 +93,12 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--threads', dest='threads', type=int,
         help='number of threads to use', metavar='INT', default=1)
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     calculate_coexpression_networks(
-        parser.expression,
-        parser.output,
-        parser.n_net,
-        parser.gpu_id,
-        parser.threads,
+        args.expression,
+        args.output,
+        args.n_net,
+        args.gpu_id,
+        args.threads,
     )

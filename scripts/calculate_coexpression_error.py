@@ -54,10 +54,10 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', dest='output',
         help='file to save the coexpression error to', metavar='FILE')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     calculate_coexpression_error(
-        parser.baseline,
-        parser.to_compare,
-        parser.output,
+        args.baseline,
+        args.to_compare,
+        args.output,
     )

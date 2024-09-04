@@ -129,11 +129,11 @@ if __name__ == '__main__':
     parser.add_argument('-rs', '--random-seed', dest='random_seed', type=int,
         help='random seed', metavar='INT', default=None)
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     generate_control_expression(
-        parser.expression,
-        parser.output,
-        parser.n_repeats,
-        parser.random_seed,
+        args.expression,
+        args.output,
+        args.n_repeats,
+        args.random_seed,
     )

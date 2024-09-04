@@ -87,13 +87,13 @@ if __name__ == '__main__':
     parser.add_argument('-ppo', '--ppi-prior-output', dest='ppi_p_o',
         help='file to save the filtered PPI prior into', metavar='FILE')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     filter_expression_and_priors(
-        parser.expression,
-        parser.motif_p,
-        parser.ppi_p,
-        parser.expression_o,
-        parser.motif_p_o,
-        parser.ppi_p_o,
+        args.expression,
+        args.motif_p,
+        args.ppi_p,
+        args.expression_o,
+        args.motif_p_o,
+        args.ppi_p_o,
     )

@@ -121,12 +121,12 @@ if __name__ == '__main__':
     parser.add_argument('-rs', '--random-seed', dest='random_seed', type=int,
         help='random seed', metavar='INT', default=None)
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     downsample_reads(
-        parser.expression,
-        parser.output,
-        parser.sparsity,
-        parser.n_repeats,
-        parser.random_seed,
+        args.expression,
+        args.output,
+        args.sparsity,
+        args.n_repeats,
+        args.random_seed,
     )

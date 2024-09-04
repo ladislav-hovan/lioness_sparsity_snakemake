@@ -35,9 +35,9 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', dest='output',
         help='file to save the coexpression matrix into', metavar='FEATHER')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     calculate_coexpression_matrix(
-        parser.expression,
-        parser.output,
+        args.expression,
+        args.output,
     )

@@ -56,11 +56,11 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', dest='output',
         help='file to save the plot to', metavar='FILE')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     plot_correlation_by_sparsity(
-        parser.input_files,
-        parser.s_levels,
-        parser.corr_name,
-        parser.output,
+        args.input_files,
+        args.s_levels,
+        args.corr_name,
+        args.output,
     )

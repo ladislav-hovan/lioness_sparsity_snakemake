@@ -1,4 +1,3 @@
-### Input and output variables ###
 SUMMARY_CORR_PLOTS = expand(
     os.path.join('plots', '{transform}', '{method}', '{data_type}',
         '{corr}_correlation.png'),

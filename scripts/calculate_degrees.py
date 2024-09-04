@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 ### Imports ###
-import pandas as pd
-
 from pathlib import Path
 
 from lib.functions import load_file
@@ -47,10 +45,10 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdegree', dest='outd_feather',
         help='file to save the indegrees into', metavar='FEATHER')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     calculate_degrees(
-        parser.lioness_feather,
-        parser.ind_feather,
-        parser.outd_feather,
+        args.lioness_feather,
+        args.ind_feather,
+        args.outd_feather,
     )

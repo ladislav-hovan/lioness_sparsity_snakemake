@@ -61,11 +61,11 @@ if __name__ == '__main__':
     parser.add_argument('-os', '--output-spearman', dest='output_spearman',
         help='file to save the Spearman correlations to', metavar='FILE')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     calculate_correlations(
-        parser.baseline,
-        parser.to_compare,
-        parser.output_pearson,
-        parser.output_spearman,
+        args.baseline,
+        args.to_compare,
+        args.output_pearson,
+        args.output_spearman,
     )

@@ -40,9 +40,9 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', dest='output',
         help='file to save the rescaled gene expression into', metavar='FILE')
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     rescale_expression_log1p(
-        parser.expression,
-        parser.output,
+        args.expression,
+        args.output,
     )
