@@ -1,5 +1,6 @@
 from scripts.calculate_coexpression_error import calculate_coexpression_error
 from scripts.calculate_correlations import calculate_correlations
+from scripts.calculate_correlations_in_groups import calculate_correlations_in_groups
 
 rule calculate_expression_correlations:
     input:
@@ -102,6 +103,29 @@ rule calculate_indegree_correlations_control:
         C_IND_CORR_SPEARMAN,
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
+
+rule calculate_indegree_correlations_in_groups_zero:
+    input:
+        BL_INDEGREE_FEATHER,
+        S_INDEGREES_FEATHER,
+        expand(
+            os.path.join('sparse_expression', '{{transform}}', '{{method}}',
+                '{{sparsity}}', 'mark_zero_{repeat}.tsv'),
+            repeat=range(config['n_repeats']),
+        ),
+    output:
+        os.path.join('indegree_correlations', '{transform}',
+            '{method}', '{sparsity}', 'pearson_zero_t.npy'),
+        os.path.join('indegree_correlations', '{transform}',
+            '{method}', '{sparsity}', 'pearson_zero_f.npy'),
+        os.path.join('indegree_correlations', '{transform}',
+            '{method}', '{sparsity}', 'spearman_zero_t.npy'),
+        os.path.join('indegree_correlations', '{transform}',
+            '{method}', '{sparsity}', 'spearman_zero_f.npy'),
+    run:
+        calculate_correlations_in_groups(input[0],
+            input[1:1+config['n_repeats']], input[1+config['n_repeats']:],
+            output[0], output[1], output[2], output[3])
 
 rule calculate_edge_correlations:
     input:

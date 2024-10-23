@@ -159,3 +159,47 @@ def plot_boxplots(
     ax.grid(axis='y')
 
     return fig,ax
+
+
+def plot_boxplots_in_groups(
+    data: pd.DataFrame,
+    corr_name: Optional[Literal['pearson', 'spearman']],
+    ylim: Tuple[float, float] = (0, 1),
+) -> Tuple[plt.Figure, plt.Axes]:
+    """
+    Plots the boxplot from the given data.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        pandas DataFrame containing the data
+    corr_name : Optional[Literal['pearson', 'spearman']]
+        Which type of correlation was used to generate the data or None
+        it it is coexpression error
+    ylim : Tuple[float, float], optional
+        Limits of the y axis, by default (0, 1)
+
+    Returns
+    -------
+    Tuple[plt.Figure, plt.Axes]
+        matplotlib Figure and Axes of the generated plot
+    """
+
+    fig,ax = plt.subplots(figsize=(8,4))
+
+    # ax.boxplot(data[[data.columns[0]]], labels=data.columns[0],
+    #     manage_ticks=False, positions=[0])
+    ax.boxplot(data, positions=[0] + sum([[i-0.15, i+0.15] for i in range(1, 1 + (len(data.columns) - 1) // 2)], start=[]),
+        manage_ticks=False, widths=0.3)
+    ax.set_xticks(range((len(data.columns) + 1) // 2))
+    ax.set_xticklabels([0] + [int(float(x[:-1])) for x in data.columns[1::2]])
+    ax.set_ylim(ylim)
+    ax.set_xlabel('Sparsity % of expressed genes')
+    if corr_name is not None:
+        corr_name = corr_name[0].upper() + corr_name[1:]
+        ax.set_ylabel(f'{corr_name} R compared to no sparsity')
+    else:
+        ax.set_ylabel('Abs. coexpr. error compared to no sparsity')
+    ax.grid(axis='y')
+
+    return fig,ax

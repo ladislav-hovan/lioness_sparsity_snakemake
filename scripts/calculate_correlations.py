@@ -39,10 +39,8 @@ def calculate_correlations(
     for file in to_compare:
         df = load_file(file).fillna(0)
         for col in df.columns:
-            pearson_r.append(stats.pearsonr(baseline_df[col],
-                df[col])[0])
-            spearman_r.append(stats.spearmanr(baseline_df[col],
-                df[col])[0])
+            pearson_r.append(stats.pearsonr(baseline_df[col], df[col])[0])
+            spearman_r.append(stats.spearmanr(baseline_df[col], df[col])[0])
 
     np.save(output_pearson, pearson_r)
     np.save(output_spearman, spearman_r)

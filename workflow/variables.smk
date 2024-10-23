@@ -56,10 +56,10 @@ C_TRANS_EXPRESSION_FILES = expand(
 C_TRANS_EXPRESSION_FILE = os.path.join('control_expression', '{transform}',
     'expression_{repeat}.tsv')
 
-ZERO_GENES_MARK = os.path.join('sparse_expression', '{method}', '{sparsity}',
-    'mark_zero_{repeat}.tsv')
-TOP_HALF_GENES_MARK = os.path.join('sparse_expression', '{method}',
-    '{sparsity}', 'mark_top_half_{repeat}.tsv')
+ZERO_GENES_MARK = os.path.join('sparse_expression', '{transform}', '{method}',
+    '{sparsity}', 'mark_zero_{repeat}.tsv')
+TOP_HALF_GENES_MARK = os.path.join('sparse_expression', '{transform}',
+    '{method}', '{sparsity}', 'mark_top_half_{repeat}.tsv')
 
 S_ANY_EXPRESSION_FILE = os.path.join('sparse_expression', '{transform}',
     '{method}', '{sparsity}', 'expression_{repeat}.tsv')

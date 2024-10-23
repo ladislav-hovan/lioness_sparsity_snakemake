@@ -49,6 +49,15 @@ rule all:
     input:
         SUMMARY_CORR_PLOTS,
         COEXPR_ERROR_PLOTS,
+        expand(
+            os.path.join('indegree_correlations', '{transform}',
+                '{method}', '{sparsity}', 'pearson_zero_t.npy'),
+            transform=config['transformations'],
+            sparsity=config['sparsity_levels'],
+            method=config['sparsifying_methods'],
+        ),
+        os.path.join('plots', 'raw_expression', 'resample', 'indegree',
+            'pearson_correlation_zero.png')
     default_target:
         True
 

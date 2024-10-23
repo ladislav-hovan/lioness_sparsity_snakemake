@@ -1,6 +1,7 @@
 from scripts.downsample_reads import downsample_reads
 from scripts.filter_expression_and_priors import filter_expression_and_priors
 from scripts.generate_control_expression import generate_control_expression
+from scripts.mark_zero_expression_genes import mark_zero_expression_genes
 from scripts.resample_reads import resample_reads
 from scripts.rescale_expression_log1p import rescale_expression_log1p
 
@@ -58,9 +59,8 @@ rule mark_zero_expression_genes:
         S_ANY_EXPRESSION_FILE
     output:
         ZERO_GENES_MARK
-    script:
-        # TODO: Implement
-        'scripts/mark_zero_expression_genes.py'
+    run:
+        mark_zero_expression_genes(input[0], output[0])
 
 rule mark_top_half_expression_genes:
     input:
