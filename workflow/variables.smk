@@ -1,10 +1,11 @@
 SUMMARY_CORR_PLOTS = expand(
     os.path.join('plots', '{transform}', '{method}', '{data_type}',
-        '{corr}_correlation.png'),
+        '{corr}_correlation.{fig_ext}'),
     transform=config['transformations'],
     method=config['sparsifying_methods'],
     data_type=config['data_types'],
     corr=config['corr_types'],
+    fig_ext=config['fig_extension']
 )
 COEXPR_ERROR_PLOTS = expand(
     os.path.join('plots', '{transform}', '{method}_coexpr_error.png'),
@@ -49,7 +50,7 @@ C_EXPRESSION_FILES = expand(
     repeat=range(config['n_repeats']),
 )
 C_TRANS_EXPRESSION_FILES = expand(
-    os.path.join('control_expression', '{{transform}}',
+    os.path.join('control_expression', '{{transform}}{{noise}}',
         'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
@@ -97,7 +98,7 @@ C_COEXPR_MAT_SINGLE = os.path.join('coexpression_matrices', '{transform}',
     'control', 'coexpression_{repeat}.feather')
 
 S_ANY_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', '{{transform}}', '{{method}}',
+    os.path.join('sparse_expression', '{{transform}}{{noise}}', '{{method}}',
         '{{sparsity}}', 'expression_{repeat}.tsv'),
     repeat=range(config['n_repeats']),
 )
@@ -105,14 +106,14 @@ S_ANY_EXPRESSION_FILES = expand(
 F_TRANS_EXPRESSION_FILE = os.path.join('filtered_input', '{transform}',
     'expression.tsv')
 
-EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}',
+EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}{noise}',
     '{method}', '{sparsity}', 'pearson.npy')
-EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}',
+EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}{noise}',
     '{method}', '{sparsity}', 'spearman.npy')
 
-C_EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}',
+C_EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{transform}{noise}',
     'control', 'pearson.npy')
-C_EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}',
+C_EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{transform}{noise}',
     'control', 'spearman.npy')
 
 COEXPR_ERROR = os.path.join('coexpression_error', '{transform}', '{method}',
@@ -121,24 +122,24 @@ COEXPR_ERROR = os.path.join('coexpression_error', '{transform}', '{method}',
 BL_INDEGREE_FEATHER = os.path.join('lioness_networks', '{transform}',
     'baseline', 'indegrees.feather')
 C_INDEGREES_FEATHER = expand(
-    os.path.join('lioness_networks', '{{transform}}', 'control', '{repeat}',
+    os.path.join('lioness_networks', '{{transform}}{{noise}}', 'control', '{repeat}',
         'indegrees.feather'),
     repeat=range(config['n_repeats']),
 )
 S_INDEGREES_FEATHER = expand(
-    os.path.join('lioness_networks', '{{transform}}', '{{method}}',
+    os.path.join('lioness_networks', '{{transform}}{{noise}}', '{{method}}',
         '{{sparsity}}', '{repeat}', 'indegrees.feather'),
     repeat=range(config['n_repeats']),
 )
 
-IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}',
+IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}{noise}',
     '{method}', '{sparsity}', 'pearson.npy')
-IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}',
+IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}{noise}',
     '{method}', '{sparsity}', 'spearman.npy')
 
-C_IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}',
+C_IND_CORR_PEARSON = os.path.join('indegree_correlations', '{transform}{noise}',
     'control', 'pearson.npy')
-C_IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}',
+C_IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{transform}{noise}',
     'control', 'spearman.npy')
 
 BL_LIONESS_FEATHER = os.path.join('lioness_networks', '{transform}',
@@ -214,7 +215,7 @@ CORR_FILES = expand(
     sparsity=config['sparsity_levels'],
 )
 CORR_PLOT = os.path.join('plots', '{transform}', '{method}', '{data_type}',
-    '{corr}_correlation.png')
+        '{corr}_correlation.{fig_ext}')
 
 C_COEXPR_ERROR_FILE = os.path.join('coexpression_error', '{transform}',
     'control', 'abs_error.npy')
@@ -223,5 +224,5 @@ COEXPR_ERROR_FILES = expand(
         '{sparsity}', 'abs_error.npy'),
     sparsity=config['sparsity_levels'],
 )
-COEXPR_ERROR_PLOT = os.path.join('plots', '{transform}',
-    '{method}_coexpr_error.png')
+COEXPR_ERROR_PLOT = os.path.join('plots', '{transform}', 
+    '{method}_coexpr_error.{fig_ext}')

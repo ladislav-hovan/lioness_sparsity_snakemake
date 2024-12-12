@@ -48,16 +48,32 @@ include: os.path.join('workflow', 'variables.smk')
 rule all:
     input:
         SUMMARY_CORR_PLOTS,
-        COEXPR_ERROR_PLOTS,
-        expand(
-            os.path.join('indegree_correlations', '{transform}',
-                '{method}', '{sparsity}', 'pearson_zero_t.npy'),
-            transform=config['transformations'],
-            sparsity=config['sparsity_levels'],
-            method=config['sparsifying_methods'],
-        ),
-        os.path.join('plots', 'raw_expression', 'resample', 'indegree',
-            'pearson_correlation_zero.png')
+        # COEXPR_ERROR_PLOTS,
+        # expand(
+        #     os.path.join('indegree_correlations', '{transform}',
+        #         '{method}', '{sparsity}', 'pearson_zero_t.npy'),
+        #     transform=config['transformations'],
+        #     sparsity=config['sparsity_levels'],
+        #     method=config['sparsifying_methods'],
+        # ),
+        # os.path.join('plots', 'raw_expression', 'resample', 'indegree',
+        #     'pearson_correlation_zero.png')
+        # expand(
+        #     os.path.join('lioness_networks', 'raw_expression_noise',
+        #         'control', '{repeat}', 'indegrees.feather'),
+        #     repeat=range(config['n_repeats']),
+        # ),
+        # expand(
+        #     os.path.join('lioness_networks', 'raw_expression_noise',
+        #         '{method}', '{sparsity}', '{repeat}', 'indegrees.feather'),
+        #     method=config['sparsifying_methods'],
+        #     sparsity=config['sparsity_levels'],
+        #     repeat=range(config['n_repeats']),
+        # ),
+        # os.path.join('plots', 'log1p_rescaled_noise', 'resample', 'indegree',
+        #     'pearson_correlation.png'),
+        # os.path.join('plots', 'log1p_rescaled_noise', 'resample', 'expression',
+        #     'pearson_correlation.png'),
     default_target:
         True
 

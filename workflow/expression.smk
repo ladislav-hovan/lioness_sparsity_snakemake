@@ -1,3 +1,4 @@
+from scripts.add_expression_noise import add_expression_noise
 from scripts.downsample_reads import downsample_reads
 from scripts.filter_expression_and_priors import filter_expression_and_priors
 from scripts.generate_control_expression import generate_control_expression
@@ -82,3 +83,19 @@ rule rescale_filtered_expression_log1p:
         path_to_dir_2='.*',
     run:
         rescale_expression_log1p(input[0], output[0])
+
+rule add_expression_noise:
+    input:
+        ANY_EXPRESSION_FILE
+    output:
+        os.path.join('{path_to_dir_1}',
+            'raw_expression_noise{path_to_dir_2}', 'expression{repeat}.tsv')
+    params:
+        scale = config['noise_scale']
+    wildcard_constraints:
+        # Allow them to be empty as well
+        path_to_dir_1='.*expression',
+        repeat='.*',
+        path_to_dir_2='.*',
+    run:
+        add_expression_noise(input[0], output[0], params['scale'])
