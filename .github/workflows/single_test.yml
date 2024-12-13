@@ -30,11 +30,21 @@ jobs:
         pip install pytest
         pip install -r requirements.txt
         
-    - name: Check symlinks
+    - name: Set up the submodule
+      run: |
+        git submodule init
+        git submodule update
+      
+    - name: Check the submodule
       run: |
         cd scripts
         cd lib
         cd ..
+        cd ..
+      
+    - name: Check the symlink
+      run: |
+        cd lib
         cd ..
 
     # - name: Run the tests

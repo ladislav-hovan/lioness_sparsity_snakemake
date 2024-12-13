@@ -9,6 +9,8 @@ rule calculate_expression_correlations:
     output:
         EXPR_CORR_PEARSON,
         EXPR_CORR_SPEARMAN,
+    wildcard_constraints:
+        noise='^$|_noise'
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
 
@@ -19,6 +21,8 @@ rule calculate_expression_correlations_control:
     output:
         C_EXPR_CORR_PEARSON,
         C_EXPR_CORR_SPEARMAN,
+    wildcard_constraints:
+        noise='^$|_noise'
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
 
@@ -91,6 +95,8 @@ rule calculate_indegree_correlations:
     output:
         IND_CORR_PEARSON,
         IND_CORR_SPEARMAN,
+    wildcard_constraints:
+        noise='^$|_noise'
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
 
@@ -101,6 +107,8 @@ rule calculate_indegree_correlations_control:
     output:
         C_IND_CORR_PEARSON,
         C_IND_CORR_SPEARMAN,
+    wildcard_constraints:
+        noise='^$|_noise'
     run:
         calculate_correlations(input[0], input[1:], output[0], output[1])
 
