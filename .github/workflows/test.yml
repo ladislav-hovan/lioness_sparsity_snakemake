@@ -57,11 +57,6 @@ jobs:
         cd lib
         cd ..
         cd ..
-      
-    - name: Check the symlink
-      run: |
-        cd lib
-        cd ..
 
     # - name: Run the tests
     #   run: snakemake --cores=1 --configfile=tests/test_config.yaml
