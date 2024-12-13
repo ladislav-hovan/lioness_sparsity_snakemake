@@ -34,12 +34,11 @@ jobs:
         python3 --version
 
     - name: Install MacOS-specific hdf5 dependency
+      if: ${{ matrix.os }} == "macos-latest"
       run: |
-        if [[ "${{ matrix.os }}" == "macos-latest" ]]; then 
-          brew install hdf5 c-blosc
-          export HDF5_DIR=/opt/homebrew/Cellar/hdf5/
-          export BLOSC_DIR=/opt/homebrew/Cellar/c-blosc/
-        fi
+        brew install hdf5 c-blosc
+        export HDF5_DIR=/opt/homebrew/Cellar/hdf5/
+        export BLOSC_DIR=/opt/homebrew/Cellar/c-blosc/
 
     - name: Install dependencies
       run: |
