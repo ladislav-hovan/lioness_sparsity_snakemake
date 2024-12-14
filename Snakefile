@@ -4,235 +4,88 @@ configfile: 'config.yaml'
 
 ### Imports and setup ###
 import os
+import pickle
+
+from pathlib import Path
+
+from lib.functions import get_most_recent_log_time
 
 global_resources = workflow.global_resources
 
 if 'gpus' in global_resources and global_resources['gpus'] > 0:
-    assert global_resources['gpus'] == len(config['gpu_ids']), (
-        'The number of GPUs in resources must match the length of provided '
-        'GPU ids')
-
-    USE_GPU = True
-
-    import cupy as cp
-
-    gpu_devices = [cp.cuda.Device(i) for i in range(4)]
-
     from lib.gpu_manager import GpuManager, allocate_gpus
 
-    gpu_manager = GpuManager(config['gpu_ids'])
+    GPU_GUARD = os.path.join('.snakemake', '.gpu_guard')
+    GPU_MANAGER = os.path.join('.snakemake', '.gpu_manager.pkl')
+
+    if (not os.path.exists(GPU_GUARD) or
+        get_most_recent_log_time() > os.path.getmtime(GPU_GUARD)):
+        print ('Running one-time GPU checks and setting up the manager')
+
+        assert global_resources['gpus'] == len(config['gpu_ids']), (
+            'The number of GPUs in resources must match the length of '
+            'provided GPU IDs')
+
+        gpu_manager = GpuManager(config['gpu_ids'])
+
+        pickle.dump(gpu_manager, open(GPU_MANAGER, 'wb'))
+
+        Path(GPU_GUARD).touch()
+    else:
+        gpu_manager = pickle.load(open(GPU_MANAGER, 'rb'))
+
+    USE_GPU = True
 else:
     USE_GPU = False
-
-    gpu_manager = None
-    allocate_gpus = None
 
 ### Configuration variables ###
 input_dir = config['input_dir']
 
-### Input and output ###
-SUMMARY_PLOTS = expand(
-    os.path.join('plots', '{data_type}_{method}_correlation.png'),
-    data_type=config['data_types'],
-    method=config['methods'],
-)
-
-EXPRESSION_FILE = os.path.join(input_dir, config['expression_file'])
-MOTIF_FILE = os.path.join(input_dir, config['motif_file'])
-PPI_FILE = os.path.join(input_dir, config['ppi_file'])
-
-# F_ prefix for filtered
-F_EXPRESSION_FILE = os.path.join('filtered_input', 'expression.tsv')
-F_MOTIF_FILE = os.path.join('filtered_input', 'motif_prior.tsv')
-F_PPI_FILE = os.path.join('filtered_input', 'ppi_prior.tsv')
-
-# S_ prefix for sparse
-S_EXPRESSION_FILES = expand(
-    os.path.join('sparse_expression', '{{sparsity}}', 
-        'expression_{repeat}.tsv'),
-    repeat=range(config['n_repeats']),
-)
-S_EXPRESSION_FILE = os.path.join('sparse_expression', '{sparsity}', 
-    'expression_{repeat}.tsv')
-
-S_LIONESS_TSV = os.path.join('lioness_networks', '{sparsity}', '{repeat}', 
-    'lioness.tsv')
-BL_LIONESS_TSV = os.path.join('lioness_networks', 'baseline', 'lioness.tsv')
-ANY_LIONESS_TSV = os.path.join('lioness_networks', '{path_to_dir}', 
-    'lioness.tsv')
-
-ANY_LIONESS_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
-    'lioness.feather')
-ANY_INDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
-    'indegrees.feather')
-ANY_OUTDEGREE_FEATHER = os.path.join('lioness_networks', '{path_to_dir}', 
-    'outdegrees.feather')
-
-EXPR_CORR_PEARSON = os.path.join('expression_correlations', '{sparsity}', 
-    'pearson.tsv')
-EXPR_CORR_SPEARMAN = os.path.join('expression_correlations', '{sparsity}', 
-    'spearman.tsv')
-
-COEXPR_ERROR = os.path.join('coexpression_error', '{sparsity}', 
-    'abs_error.tsv')
-
-BL_INDEGREE_FEATHER = os.path.join('lioness_networks', 'baseline', 
-    'indegrees.feather')
-S_INDEGREES_FEATHER = expand(
-    os.path.join('lioness_networks', '{{sparsity}}', '{repeat}', 
-        'indegrees.feather'),
-    repeat=range(config['n_repeats']),
-)
-
-IND_CORR_PEARSON = os.path.join('indegree_correlations', '{sparsity}', 
-    'pearson.tsv')
-IND_CORR_SPEARMAN = os.path.join('indegree_correlations', '{sparsity}', 
-    'spearman.tsv')
-
-CORR_FILES = expand(
-    os.path.join('{{data_type}}_correlations', '{sparsity}', '{{method}}.tsv'),
-    sparsity=config['sparsity_levels'],
-)
-CORR_PLOT = os.path.join('plots', '{data_type}_{method}_correlation.png')
+### Input and output variables ###
+include: os.path.join('workflow', 'variables.smk')
 
 ### Rules ###
 rule all:
     input:
-        SUMMARY_PLOTS
-    default_target: 
+        SUMMARY_CORR_PLOTS,
+        # COEXPR_ERROR_PLOTS,
+        # expand(
+        #     os.path.join('indegree_correlations', '{transform}',
+        #         '{method}', '{sparsity}', 'pearson_zero_t.npy'),
+        #     transform=config['transformations'],
+        #     sparsity=config['sparsity_levels'],
+        #     method=config['sparsifying_methods'],
+        # ),
+        # os.path.join('plots', 'raw_expression', 'resample', 'indegree',
+        #     'pearson_correlation_zero.png')
+        # expand(
+        #     os.path.join('lioness_networks', 'raw_expression_noise',
+        #         'control', '{repeat}', 'indegrees.feather'),
+        #     repeat=range(config['n_repeats']),
+        # ),
+        # expand(
+        #     os.path.join('lioness_networks', 'raw_expression_noise',
+        #         '{method}', '{sparsity}', '{repeat}', 'indegrees.feather'),
+        #     method=config['sparsifying_methods'],
+        #     sparsity=config['sparsity_levels'],
+        #     repeat=range(config['n_repeats']),
+        # ),
+        # os.path.join('plots', 'log1p_rescaled_noise', 'resample', 'indegree',
+        #     'pearson_correlation.png'),
+        # os.path.join('plots', 'log1p_rescaled_noise', 'resample', 'expression',
+        #     'pearson_correlation.png'),
+    default_target:
         True
 
-# TODO: Convert scripts to Python functions, call from here as run block
+include: os.path.join('workflow', 'expression.smk')
 
-rule filter_expression_and_priors:
-    input:
-        EXPRESSION_FILE,
-        MOTIF_FILE,
-        PPI_FILE,
-    output:
-        F_EXPRESSION_FILE,
-        F_MOTIF_FILE,
-        F_PPI_FILE,
-    script:
-        'scripts/filter_expression_and_priors.py'
+include: os.path.join('workflow', 'networks_common.smk')
 
-rule sparsify_reads:
-    input:
-        F_EXPRESSION_FILE
-    output:
-        S_EXPRESSION_FILES
-    script:
-        'scripts/sparsify_reads.py'
+if USE_GPU:
+    include: os.path.join('workflow', 'networks_gpu.smk')
+else:
+    include: os.path.join('workflow', 'networks_cpu.smk')
 
-rule calculate_lioness_networks:
-    input:
-        S_EXPRESSION_FILE,
-        F_MOTIF_FILE,
-        F_PPI_FILE,
-    output:
-        S_LIONESS_TSV,
-    threads:
-        1 if USE_GPU else 4
-    resources:
-        gpus = int(USE_GPU)
-    params:
-        gpu_manager = (gpu_manager if USE_GPU else None)
-    script:
-        f'{workflow.basedir}/scripts/calculate_lioness_networks.py'
-    
-    # Future possible implementation once the run bug is fixed
-    # https://github.com/snakemake/snakemake/issues/2350
-    # run:
-    #     from scripts.calculate_lioness_networks import create_lioness_networks
+include: os.path.join('workflow', 'correlations.smk')
 
-    #     if USE_GPU:
-    #         with allocate_gpus(gpu_manager, resources['gpus']) as gpu_ids:
-    #             # Only one device is yielded here
-    #             with gpu_devices[gpu_ids[0]]:
-    #                 create_lioness_networks(
-    #                     input[0], 
-    #                     input[1], 
-    #                     input[2], 
-    #                     '.', 
-    #                     'gpu', 
-    #                     lioness_options={
-    #                         'start': 1, 
-    #                         'end': int(config['n_networks']),
-    #                         'export_filename': output[0],
-    #                     })
-    #     else:
-    #         create_lioness_networks(
-    #             input[0], 
-    #             input[1], 
-    #             input[2], 
-    #             '.', 
-    #             'cpu', 
-    #             lioness_options={
-    #                 'start': 1, 
-    #                 'end': int(config['n_networks']),
-    #                 'export_filename': output[0],
-    #                 'ncores': threads
-    #             })
-
-rule calculate_baseline_networks:
-    input:
-        F_EXPRESSION_FILE,
-        F_MOTIF_FILE,
-        F_PPI_FILE,
-    output:
-        BL_LIONESS_TSV
-    threads:
-        1 if USE_GPU else 4
-    resources:
-        gpus = int(USE_GPU)
-    params:
-        gpu_manager = gpu_manager
-    script:
-        'scripts/calculate_lioness_networks.py'
-
-rule convert_lioness_tsv_to_feather:
-    input:
-        ANY_LIONESS_TSV
-    output:
-        ANY_LIONESS_FEATHER,
-        ANY_INDEGREE_FEATHER,
-        ANY_OUTDEGREE_FEATHER,
-    script:
-        'scripts/process_lioness_tsv.py'
-
-rule calculate_expression_correlations:
-    input:
-        F_EXPRESSION_FILE,
-        S_EXPRESSION_FILES,
-    output:
-        EXPR_CORR_PEARSON,
-        EXPR_CORR_SPEARMAN,
-    script:
-        'scripts/calculate_correlations.py'
-
-rule calculate_coexpression_error:
-    input:
-        F_EXPRESSION_FILE,
-        S_EXPRESSION_FILES,
-    output:
-        COEXPR_ERROR
-    script:
-        'scripts/calculate_coexpression_error.py'
-
-rule calculate_indegree_correlations:
-    input:
-        BL_INDEGREE_FEATHER,
-        S_INDEGREES_FEATHER,
-    output:
-        IND_CORR_PEARSON,
-        IND_CORR_SPEARMAN,
-    script:
-        'scripts/calculate_correlations.py'
-
-rule plot_correlation_by_sparsity:
-    input:
-        CORR_FILES
-    output:
-        CORR_PLOT
-    script:
-        'scripts/plot_correlation_by_sparsity.py'
+include: os.path.join('workflow', 'plotting.smk')

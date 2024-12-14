@@ -1,11 +1,17 @@
 random_seed: 42
-input_dir: 'input/'
+input_dir: 'input'
 expression_file: 'expression_tcga_brca_raw_nohead.tsv'
 motif_file: 'motif_prior.tsv'
 ppi_file: 'ppi_prior.tsv'
 n_networks: 50
-n_repeats: 10
-sparsity_levels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50 ]
-gpu_ids: [ 2, 3 ]
-data_types: [ 'expression', 'indegree' ]
-methods: [ 'pearson', 'spearman' ]
+n_repeats: 5
+sparsity_levels: [ 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50 ]
+gpu_ids: [ 1, 2 ]
+transformations: [ 'raw_expression' ] #, 'log1p_rescaled' ]
+sparsifying_methods: [ 'resample' ] #, 'downsample' ]
+data_types: [ 'expression', 'indegree', 'edge', 'coexpression',
+  'coexpression_network' ]
+corr_types: [ 'pearson', 'spearman' ]
+fig_extension: [ 'png', 'pdf' ]
+lioness_threads: 4
+noise_scale: 1

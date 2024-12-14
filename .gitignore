@@ -1,5 +1,13 @@
 *.pyc
 .snakemake/
+backup_*/
+coexpression_correlations/
+coexpression_error/
+coexpression_matrices/
+coexpression_network_correlations/
+coexpression_networks/
+control_expression/
+edge_correlations/
 expression_correlations/
 filtered_input/
 gpu_manager/
