@@ -1,7 +1,7 @@
+matplotlib
+netZooPy
 numpy
 pandas
-netZooPy
-matplotlib
+pytools
 scipy
 snakemake
-pytools

@@ -45,6 +45,15 @@ The features already available are:
 ## Setup
 The requirements are provided in a `requirements.txt` file.
 
+Because the scripts are provided as a submodule, after cloning the
+repository, the following commands should be run in the main module
+directory:
+
+``` bash
+git submodule init
+git submodule update --remote
+```
+
 
 ## Usage
 Running a Snakemake pipeline is straightforward:
@@ -80,7 +89,7 @@ Room for improvement:
 - Finish refactoring shared functionality
 
 To do:
-- Stratification of results by gene expression levels
+- Expand the stratification of results to be more generally applicable
 
 
 ## Acknowledgements
