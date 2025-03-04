@@ -2,4 +2,3 @@
 	path = scripts
 	url = https://github.com/ladislav-hovan/lioness_sparsity_scripts.git
 	update = merge
-	branch = .
